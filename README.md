@@ -63,6 +63,22 @@
                                                     每5天同步一次即可，
                                                     第一次配置可手动执行一次即可
 
+
+
+- 接入是否成功检测：
+
+    
+    查看xxoo.js日志中最下方，是否有类似以下内容 如有则接入成功
+    
+    ##====================  xxoo池响应   ======
+    export FRUITSHARECODES="AA@bb@cc"
+    export PETSHARECODES="111@222@333"
+    export GENERATE_INFO="xxoo助力池同步时间===========》 xxxx年xx月xx日 xx:xx:xx"
+    
+    最后一条GENERATE_INFO信息运行正常时会在其他脚本任务执行日志最上面打印出来
+    如果接入失败，请拷贝完整xxoo日志联系作者
+
+
 # 自建服务池：如果你想要自建的话
 
 环境要求：php > 7.0版本  
