@@ -70,7 +70,9 @@
 上报成功且下发助力码成功时，xxoo脚本日志内容应该类似于以下内容
 
 <details>
-    <summary>xxoo日志</summary>
+    <summary>点我展开</summary>
+    <pre>
+
 ## 开始执行... 2021-11-13 23:55:07
 
 ##  task before  /ql/log/xxoo/2021-11-13-23-55-07.log
@@ -119,7 +121,8 @@ export GENERATE_INFO="xxoo助力池同步时间===========》 2021年11月13日 
 
 
 ## 执行结束... 2021-11-13 23:55:08 耗时 1 秒
-        
+
+    </pre>
 </details>
 
 
