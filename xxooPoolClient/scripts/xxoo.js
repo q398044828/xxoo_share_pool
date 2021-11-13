@@ -77,14 +77,18 @@ function readCodesFrom_get_share_code_js_log(subDir) {
 
 function parseFrom_get_share_code_js_log(data) {
     var envs = {
-        "京东农场": "FRUITSHARECODES",
-        "京东萌宠": "PETSHARECODES",
-        "种豆得豆": "PLANT_BEAN_SHARECODES",
-        "东东工厂": "DDFACTORY_SHARECODES",
-        "京喜农场": "JXNC_SHARECODES",
-        "闪购盲盒": "JDSGMH_SHARECODES",
-        "签到领现金": "JD_CASH_SHARECODES",
-        "京喜工厂":"DREAM_FACTORY_SHARE_CODES"
+        "京东农场": "04f0666b23024383bacf09e601e9524b&add093112c6d486aa3f658f202032905&af69839bc05f403ba198f6239f6448ea&2501aa54e0a04eabbab8161c4d9ccd03&c336a7771c6d41f3942affc91abade9b
+",
+        "京东萌宠": "MTE0MDkyMjIwMDAwMDAwNDczMTI2ODU&MTE0MDkyMjIwMDAwMDAwNDczMTI3MTU",
+        "种豆得豆": "6r44ggxrdayirjmnjiuhro3eoa&gllq7xeu7blijessb33nrkdqta&acepoit575idtc3k4buc5nktum&mlrdw3aw26j3xifvq7tj53375ihqzfkufbkqjqq&ld3s3zfh2syjlsdgfpgm7rbxge3h7wlwy7o5jii
+",
+        "东东工厂": "T0084qcqEUBOCjVWnYaS5kRrbA&T0109KE6Rxoe9ACjVWnYaS5kRrbA&T0086qkcSBkeCjVWnYaS5kRrbA&T0225KkcRUxLoFzTdRzwkfIDfQCjVWnYaS5kRrbA&T018v_V6SB4Z_FPWIRib1ACjVWnYaS5kRrbA
+",
+        "京喜农场": "g_eiitD1h9-a-PX-GytKiGrfw77E3iG0LpMlIb2JHcaPy9VK5LoJnll1EoJfSak4rtHh5pujqZy293yhY3X34Q&g_eiitD1h9-a-PX-GytKiGrfw77E3iG0LpMlIb2JHcZcxdQLGzSrp3KRIyUUjDO2-hpUnry-RyN9KzW-rc6qZw&g_eiitD1h9-a-PX-GytKiGrfw77E3iG0LpMlIb2JHcauJFe6QqDEq3nylCjQly6mKcAHWPobqKGn3-Pd7y3SqA&g_eiitD1h9-a-PX-GytKiGrfw77E3iG0LpMlIb2JHca5u6_J8yUaYwsMyAOI-Pu9MhKsdKVlG1J71g7_GCfU8A",
+        "闪购盲盒": "T0084qcqEUBOCjVQmoaT5kRrbA&T0109KE6Rxoe9ACjVQmoaT5kRrbA&T0086qkcSBkeCjVQmoaT5kRrbA&T0225KkcRUxLoFzTdRzwkfIDfQCjVQmoaT5kRrbA&T018v_V6SB4Z_FPWIRib1ACjVQmoaT5kRrbA",
+        "签到领现金": "aUd-a-i1Zw&d09YZOu1&eU9Yab7gM_QipGjRznYa3w
+&IhM-ZOyyb_sn8Gy6iw&f0FuPbLl",
+        "京喜工厂":"/jxfactory RR88tLH8RdL_ANJ8h-VK-Q==&PTaoxwAwm02WRiV_t-zb_A=="
     };
 
     var res = {};
