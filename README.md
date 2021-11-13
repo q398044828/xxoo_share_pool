@@ -27,26 +27,27 @@
 - 青龙面板->环境变量 新增以下环境变量
 
 
-    XXOO_FOR <br/>
-    必填 <br/>
-    有时候我们希望优先助力某些用户，则此变量为<br/>
-    你要定向互助的用户的pt_pin参数，多个时用@符号分隔<br/>
 
-    XXOO_HOST <br/>
-    必填<br/>
-    当你不想用默认助力池时，填入你要用的xxoo助力池地址<br/>
-    本人自建服务池地址：<br/>
-    XXOO_HOST = https://sharec.siber.cn:889     <br/>
-
-    XXOO_TOKEN <br/>
-    必填<br/>
-    接入服务池的验证token,本人自建的服务池提供一个token<br/>
-    XXOO_TOKEN = dev_token <br/>
-
-    XXOO_READ_SHARE_CODE <br/>
-    选填<br/>
-    你原有的定时任务的jd_get_share_code脚本名称，不包括后缀名，<br/>
-    比如我的是：shufflewzc_faker2_jd_get_share_code <br/>
+        XXOO_FOR <br/>
+        必填 <br/>
+        有时候我们希望优先助力某些用户，则此变量为<br/>
+        你要定向互助的用户的pt_pin参数，多个时用@符号分隔<br/>
+    
+        XXOO_HOST <br/>
+        必填<br/>
+        当你不想用默认助力池时，填入你要用的xxoo助力池地址<br/>
+        本人自建服务池地址：<br/>
+        XXOO_HOST = https://sharec.siber.cn:889     <br/>
+    
+        XXOO_TOKEN <br/>
+        必填<br/>
+        接入服务池的验证token,本人自建的服务池提供一个token<br/>
+        XXOO_TOKEN = dev_token <br/>
+    
+        XXOO_READ_SHARE_CODE <br/>
+        选填<br/>
+        你原有的定时任务的jd_get_share_code脚本名称，不包括后缀名，<br/>
+        比如我的是：shufflewzc_faker2_jd_get_share_code <br/>
     
 
 - 青龙面板->定时任务 新增定时任务
