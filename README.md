@@ -67,16 +67,63 @@
 
 - 接入是否成功检测：
 
-    
-    查看xxoo.js日志中最下方，是否有类似以下内容 如有则接入成功
-    
-    ##====================  xxoo池响应   ======
-    export FRUITSHARECODES="AA@bb@cc"
-    export PETSHARECODES="111@222@333"
-    export GENERATE_INFO="xxoo助力池同步时间===========》 xxxx年xx月xx日 xx:xx:xx"
-    
-    最后一条GENERATE_INFO信息运行正常时会在其他脚本任务执行日志最上面打印出来
-    如果接入失败，请拷贝完整xxoo日志联系作者
+上报成功且下发助力码成功时，xxoo脚本日志内容应该类似于以下内容
+
+<details>
+    <summary>点我展开</summary>
+    <pre>
+        <code>
+## 开始执行... 2021-11-13 23:55:07
+
+##  task before  /ql/log/xxoo/2021-11-13-23-55-07.log
+##  
+:<<EOF
+
+🔔获取互助码+参与xxoo互助池, 开始!
+========>自动判断 jd_get_share_code 日志所在目录 开始
+========>自动判断get_share_code 日志所在目录 shufflewzc_faker2_jd_get_share_code
+
+从
+/ql/log/shufflewzc_faker2_jd_get_share_code
+目录解析日志最新获取的互助码
+
+=====以下json数据为从原版的jd_get_share_code脚本的日志中解析获取到的互助码，如果没
+有数据，请尝试先执行jd_get_share_code后再执行xxoo任务
+{
+jd_654c2078e51f7: {
+FRUITSHARECODES: 'd8d67490c41f42348ba589fd18c50edb',
+PETSHARECODES: 'MTAxNzIyNTU1NDAwMDAwMDA1MTMxMjIyMw==',
+PLANT_BEAN_SHARECODES: 'olmijoxgmjutyeukiu3el2x5tr6uxjor76jutla',
+DDFACTORY_SHARECODES: 'T0225KkcRhsdplbXJxKhkfZccwCjVWnYaS5kRrbA',
+DREAM_FACTORY_SHARE_CODES: 'cAzv4fnSw852dboodamfKQ==',
+JDSGMH_SHARECODES: 'T0225KkcRhsdplbXJxKhkfZccwCjVQmoaT5kRrbA',
+JD_CASH_SHARECODES: 'eU9Yaum2Nf4m9maAznJF0Q'
+},
+jd_76f67073b047f: {
+FRUITSHARECODES: 'ead06cd23c884a69b78e90e656da64b0',
+PETSHARECODES: 'MTEyNzEzMjc0MDAwMDAwMDYwMTM5MDEz',
+PLANT_BEAN_SHARECODES: '4npkonnsy7xi2mrf7ps6m4sy4hcm6ffzcnrmzli',
+DDFACTORY_SHARECODES: 'T0225KkcRxhP81PXJxmmlPMNIgCjVWnYaS5kRrbA',
+JDSGMH_SHARECODES: 'T0225KkcRxhP81PXJxmmlPMNIgCjVQmoaT5kRrbA',
+JD_CASH_SHARECODES: 'eU9Ya-rkYPsm9m2Hy3cUgA'
+}
+}
+EOF
+##====================  xxoo池响应(服务器下发助力码)   ======
+export FRUITSHARECODES="99@88"
+export PETSHARECODES="fghfgh@456drg"
+export PLANT_BEAN_SHARECODES="123123@3245345"
+export DDFACTORY_SHARECODES="asdf@dfgsd"
+export DREAM_FACTORY_SHARE_CODES="1@2"
+export JDSGMH_SHARECODES="aa@bb"
+export JD_CASH_SHARECODES="11@22@33"
+export GENERATE_INFO="xxoo助力池同步时间===========》 2021年11月13日 23:55:08"
+
+
+## 执行结束... 2021-11-13 23:55:08 耗时 1 秒
+        </code>
+    </pre>
+</details>
 
 
 # 自建服务池：如果你想要自建的话

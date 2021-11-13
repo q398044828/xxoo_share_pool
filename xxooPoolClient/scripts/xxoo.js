@@ -65,7 +65,7 @@ function readGet_share_codeFromDir(){
 
 function readCodesFrom_get_share_code_js_log(subDir) {
     var pathName = `${process.env.QL_DIR}/log/${subDir}`
-    console.log(`\r\n从\r\n  ${pathName} \r\n目录读取最新获取的互助码\r\n\r\n`);
+    console.log(`\r\n从\r\n  ${pathName} \r\n目录解析日志最新获取的互助码\r\n\r\n`);
     var files=fs.readdirSync(pathName);
     if(files.length>0){
         var lastLog=files[files.length-1];
