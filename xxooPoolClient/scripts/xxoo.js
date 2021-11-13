@@ -44,14 +44,27 @@ function uploadAndGetShareCodes(data) {
 function readCodesFrom(){
     var res=null;
     if(process.env.XXOO_READ_SHARE_CODE){
-        res=readCodesFrom_get_share_code_js_log();
+        res=readCodesFrom_get_share_code_js_log(process.env.XXOO_READ_SHARE_CODE);
+    }else{
+        res=readGet_share_codeFromDir();
     }
     return res;
 }
 
+function readGet_share_codeFromDir(){
+    console.log(`========>自动判断 jd_get_share_code 日志所在目录 开始`);
+    var pathName=`${process.env.QL_DIR}/log`;
+    var dirs=fs.readdirSync(pathName);
+    for (let i = 0; i < dirs.length; i++) {
+        if (dirs[i].endsWith("get_share_code")) {
+            console.log(`========>自动判断get_share_code 日志所在目录 ${dirs[i]}`);
+            return readCodesFrom_get_share_code_js_log(dirs[i]);
+        }
+    }
+}
 
-function readCodesFrom_get_share_code_js_log() {
-    var pathName = `${process.env.QL_DIR}/log/${process.env.XXOO_READ_SHARE_CODE}`
+function readCodesFrom_get_share_code_js_log(subDir) {
+    var pathName = `${process.env.QL_DIR}/log/${subDir}`
     console.log(`\r\n从\r\n  ${pathName} \r\n目录读取最新获取的互助码\r\n\r\n`);
     var files=fs.readdirSync(pathName);
     if(files.length>0){
@@ -78,6 +91,10 @@ function parseFrom_get_share_code_js_log(data) {
 
     var i = 0;
     var idx = 0;
+    /**
+     * 看起来很low的解析方式对不对？
+     * 对，但是我菜啊，正则不太会用！！！
+     */
     do {
         try {
             i++;

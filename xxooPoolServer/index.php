@@ -1,37 +1,21 @@
 <?php
-/**
- * Front to the WordPress application. This file doesn't do anything, but loads
- * wp-blog-header.php which does and tells WordPress to load the theme.
- *
- * @package WordPress
- */
-
-/**
- * Tells WordPress to load the WordPress theme and output it.
- *
- * @var bool
- */
-//define( 'WP_USE_THEMES', true );
-
-/** Loads the WordPress Environment and Template */
-//require __DIR__ . '/wp-blog-header.php';
 
 require_once './db.php';
 require_once './util.php';
 
 
-$userId = getUserId($_GET[TOKEN_PARAMETER_NAME]);
+// 用户校验和获取
+$user = getUser($_GET[TOKEN_PARAMETER_NAME]);
+$userId=$user['ID'];
+$limited=$user['LIMITED'];
+//用户上传的助力码数量校验
+recordLimitCheck($userId,$limited);
+
+//每次被请求都先清理超过2周没有更新的数据
+cleanByRul();
+
 $res = "";
 switch ($_SERVER['PATH_INFO']) {
-    case '/upload':
-        upload($userId, $_POST['data']);
-        $res = getCodes($userId, $_POST['data']);
-        resRaw($res);
-        break;
-    case '/get':
-        $res = getCodes($userId);
-        resRaw($res);
-        break;
     case '/uploadAndGetCodes':
         $res = uploadAndGetCodes($userId, $GLOBALS['HTTP_RAW_POST_DATA']);
         resRaw($res);
@@ -40,6 +24,38 @@ switch ($_SERVER['PATH_INFO']) {
         res(400, '不盈利，不推广，自用！！，请勿攻击');
         break;
 }
+
+function cleanByRul(){
+    global $db;
+    $ctime=time()-1209600;//2周前
+    $count=$db->count('share_code',[
+        'CREATE_TIME[<]'=>$ctime
+    ]);
+    //为什么要先查询再执行update? 因为sqlite执行修改时会锁定文件导致并发下降,但是可以共享读
+    if ($count>100) {
+        //大于100判断是为了减少进行删除的频率
+        $db->delete('share_code',[
+            'CREATE_TIME[<]'=>$ctime
+        ]);
+    }
+}
+
+/**
+ * 用户助力码数量校验
+ * @param $userId
+ * @param $limited
+ */
+function recordLimitCheck($userId,$limited){
+    global $db;
+    $count=$db->count('share_code',[
+        'USER_ID'=>$userId
+    ]);
+
+    if ($count>$limited) {
+        res(400,'当前用户token上传的助力码数量已超标');
+    }
+}
+
 /**
  * @param $userId
  * @param $data
@@ -194,14 +210,6 @@ function askFor($askFor)
     return $codes;
 }
 
-function foreachReq($req, $call)
-{
-    foreach ($req as $ptPin => $envs) {
-        foreach ($envs as $env => $code) {
-            call_user_func($call, array($ptPin, $env, $code));
-        }
-    }
-}
 
 /**
  * 从数据库随机获取对应env下的互助码
@@ -221,30 +229,4 @@ EOF;
     return array_unique($codes);
 }
 
-function upload($userId, $data)
-{
-    global $db;
-    $envs = explode('@', $data);
-    foreach ($envs as $env) {
-        $env = explode("=", $env);
-        $name = $env[0];
-        if ($name == '') {
-            continue;
-        }
-        $vals = explode("&", $env[1]);
-        foreach ($vals as $code) {
-            if ($code == '') {
-                continue;
-            }
-            $res = $db->insert('share_code', [
-                'USER_ID' => $userId,
-                'ENV_NAME' => $name,
-                'CODE' => $code,
-                'CREATE_TIME' => time()
-            ]);
-            $r[$name][$code] = $res > 0 ? true : false;
-        }
-    }
-    return $r;
-}
 

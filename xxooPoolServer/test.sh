@@ -1,7 +1,0 @@
-export FRUITSHARECODES="a3@a2&a3@a1&a2@a1"
-export PETSHARECODES="b3@b2&b1@b3&b1@b2"
-export PLANT_BEAN_SHARECODES="c2@c3&c3@c1&c2@c1"
-export DDFACTORY_SHARECODES="d2@d3&d1@d3&d2@d1"
-export DREAM_FACTORY_SHARE_CODES="&f1&f1"
-export JDSGMH_SHARECODES="g2@g3&g1@g3&g2@g1"
-export JD_CASH_SHARECODES="h2@h3&h3@h1&h2@h1"

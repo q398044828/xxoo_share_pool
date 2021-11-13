@@ -15,13 +15,13 @@ function resRaw($data){
     die($data);
 }
 
-function getUserId($token){
+function getUser($token){
     global $db;
-    $id=$db->select('user','ID',[
+    $user=$db->select('user',['ID','LIMITED'],[
         'TOKEN'=>$token
     ]);
-    if(count($id)<1){
+    if(count($user)<1){
         res(400,'token不存在');
     }
-    return $id[0];
+    return $user[0];
 }

@@ -36,7 +36,7 @@ CREATE UNIQUE INDEX user_token
 on user (TOKEN);
 |||
 
-insert into user('TOKEN','ENABLED','LIMITED') values ('dev_token',1,100);
+insert into user('TOKEN','ENABLED','LIMITED') values ('dev_token',1,1000);
 
 EOF;
 
