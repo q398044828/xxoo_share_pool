@@ -4,10 +4,60 @@
 var fs = require("fs");
 console.log(":<<EOF");
 const $ = new Env("获取互助码+参与xxoo互助池");
-
+let cookiesArr = [], cookie = '', message;
+const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 
 !function(n){"use strict";function r(n,r){var t=(65535&n)+(65535&r);return(n>>16)+(r>>16)+(t>>16)<<16|65535&t}function t(n,r){return n<<r|n>>>32-r}function u(n,u,e,o,c,f){return r(t(r(r(u,n),r(o,f)),c),e)}function e(n,r,t,e,o,c,f){return u(r&t|~r&e,n,r,o,c,f)}function o(n,r,t,e,o,c,f){return u(r&e|t&~e,n,r,o,c,f)}function c(n,r,t,e,o,c,f){return u(r^t^e,n,r,o,c,f)}function f(n,r,t,e,o,c,f){return u(t^(r|~e),n,r,o,c,f)}function i(n,t){n[t>>5]|=128<<t%32,n[14+(t+64>>>9<<4)]=t;var u,i,a,h,g,l=1732584193,d=-271733879,v=-1732584194,C=271733878;for(u=0;u<n.length;u+=16)i=l,a=d,h=v,g=C,d=f(d=f(d=f(d=f(d=c(d=c(d=c(d=c(d=o(d=o(d=o(d=o(d=e(d=e(d=e(d=e(d,v=e(v,C=e(C,l=e(l,d,v,C,n[u],7,-680876936),d,v,n[u+1],12,-389564586),l,d,n[u+2],17,606105819),C,l,n[u+3],22,-1044525330),v=e(v,C=e(C,l=e(l,d,v,C,n[u+4],7,-176418897),d,v,n[u+5],12,1200080426),l,d,n[u+6],17,-1473231341),C,l,n[u+7],22,-45705983),v=e(v,C=e(C,l=e(l,d,v,C,n[u+8],7,1770035416),d,v,n[u+9],12,-1958414417),l,d,n[u+10],17,-42063),C,l,n[u+11],22,-1990404162),v=e(v,C=e(C,l=e(l,d,v,C,n[u+12],7,1804603682),d,v,n[u+13],12,-40341101),l,d,n[u+14],17,-1502002290),C,l,n[u+15],22,1236535329),v=o(v,C=o(C,l=o(l,d,v,C,n[u+1],5,-165796510),d,v,n[u+6],9,-1069501632),l,d,n[u+11],14,643717713),C,l,n[u],20,-373897302),v=o(v,C=o(C,l=o(l,d,v,C,n[u+5],5,-701558691),d,v,n[u+10],9,38016083),l,d,n[u+15],14,-660478335),C,l,n[u+4],20,-405537848),v=o(v,C=o(C,l=o(l,d,v,C,n[u+9],5,568446438),d,v,n[u+14],9,-1019803690),l,d,n[u+3],14,-187363961),C,l,n[u+8],20,1163531501),v=o(v,C=o(C,l=o(l,d,v,C,n[u+13],5,-1444681467),d,v,n[u+2],9,-51403784),l,d,n[u+7],14,1735328473),C,l,n[u+12],20,-1926607734),v=c(v,C=c(C,l=c(l,d,v,C,n[u+5],4,-378558),d,v,n[u+8],11,-2022574463),l,d,n[u+11],16,1839030562),C,l,n[u+14],23,-35309556),v=c(v,C=c(C,l=c(l,d,v,C,n[u+1],4,-1530992060),d,v,n[u+4],11,1272893353),l,d,n[u+7],16,-155497632),C,l,n[u+10],23,-1094730640),v=c(v,C=c(C,l=c(l,d,v,C,n[u+13],4,681279174),d,v,n[u],11,-358537222),l,d,n[u+3],16,-722521979),C,l,n[u+6],23,76029189),v=c(v,C=c(C,l=c(l,d,v,C,n[u+9],4,-640364487),d,v,n[u+12],11,-421815835),l,d,n[u+15],16,530742520),C,l,n[u+2],23,-995338651),v=f(v,C=f(C,l=f(l,d,v,C,n[u],6,-198630844),d,v,n[u+7],10,1126891415),l,d,n[u+14],15,-1416354905),C,l,n[u+5],21,-57434055),v=f(v,C=f(C,l=f(l,d,v,C,n[u+12],6,1700485571),d,v,n[u+3],10,-1894986606),l,d,n[u+10],15,-1051523),C,l,n[u+1],21,-2054922799),v=f(v,C=f(C,l=f(l,d,v,C,n[u+8],6,1873313359),d,v,n[u+15],10,-30611744),l,d,n[u+6],15,-1560198380),C,l,n[u+13],21,1309151649),v=f(v,C=f(C,l=f(l,d,v,C,n[u+4],6,-145523070),d,v,n[u+11],10,-1120210379),l,d,n[u+2],15,718787259),C,l,n[u+9],21,-343485551),l=r(l,i),d=r(d,a),v=r(v,h),C=r(C,g);return[l,d,v,C]}function a(n){var r,t="",u=32*n.length;for(r=0;r<u;r+=8)t+=String.fromCharCode(n[r>>5]>>>r%32&255);return t}function h(n){var r,t=[];for(t[(n.length>>2)-1]=void 0,r=0;r<t.length;r+=1)t[r]=0;var u=8*n.length;for(r=0;r<u;r+=8)t[r>>5]|=(255&n.charCodeAt(r/8))<<r%32;return t}function g(n){return a(i(h(n),8*n.length))}function l(n,r){var t,u,e=h(n),o=[],c=[];for(o[15]=c[15]=void 0,e.length>16&&(e=i(e,8*n.length)),t=0;t<16;t+=1)o[t]=909522486^e[t],c[t]=1549556828^e[t];return u=i(o.concat(h(r)),512+8*r.length),a(i(c.concat(u),640))}function d(n){var r,t,u="";for(t=0;t<n.length;t+=1)r=n.charCodeAt(t),u+="0123456789abcdef".charAt(r>>>4&15)+"0123456789abcdef".charAt(15&r);return u}function v(n){return unescape(encodeURIComponent(n))}function C(n){return g(v(n))}function A(n){return d(C(n))}function m(n,r){return l(v(n),v(r))}function s(n,r){return d(m(n,r))}function b(n,r,t){return r?t?m(r,n):s(r,n):t?C(n):A(n)}$.md5=b}();
-var codes=readCodesFrom();
+if ($.isNode()) {
+    Object.keys(jdCookieNode).forEach((item) => {
+        cookiesArr.push(jdCookieNode[item])
+    })
+    if (process.env.JD_DEBUG && process.env.JD_DEBUG === 'false') console.log = () => {
+    };
+} else {
+    cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
+}
+
+var ptPins = [];
+for (let i = 0; i < cookiesArr.length; i++) {
+    ptPins[i] = null;
+    if (cookiesArr[i]) {
+        cookie = cookiesArr[i];
+        var ptPin = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+        ptPins[i] = ptPin;
+    }
+}
+
+//jd_get_share_code.js脚本的命名映射
+var envsGetShareCodeJs = {
+    "京东农场": "FRUITSHARECODES",
+    "京东萌宠": "PETSHARECODES",
+    "种豆得豆": "PLANT_BEAN_SHARECODES",
+    "东东工厂": "DDFACTORY_SHARECODES",
+    "京喜农场": "JXNC_SHARECODES",
+    "闪购盲盒": "JDSGMH_SHARECODES",
+    "签到领现金": "JD_CASH_SHARECODES",
+    "京喜工厂": "DREAM_FACTORY_SHARE_CODES"
+};
+
+//code.sh脚本的命名映射
+var envsCodeSh = {
+    'MyFruit': 'FRUITSHARECODES',
+    'MyPet': 'PETSHARECODES',
+    'MyBean': 'PLANT_BEAN_SHARECODES',
+    'MyDreamFactory': 'DREAM_FACTORY_SHARE_CODES',
+    'MyJdFactory': 'DDFACTORY_SHARECODES',
+    'MyJdzz': 'JDZZ_SHARECODES',
+    'MyJoy': 'JDJOY_SHARECODES',
+    'MyJxnc': 'JXNC_SHARECODES',
+    'MyBookShop': 'BOOKSHOP_SHARECODES',
+    'MyCash': 'JD_CASH_SHARECODES',
+    'MySgmh': 'JDSGMH_SHARECODES',
+    'MyCfd': 'JDCFD_SHARECODES',
+    'MyHealth': 'JDHEALTH_SHARECODES'
+};
+
+var codes = readCodesFrom();
 console.log(codes);
 uploadAndGetShareCodes(codes);
 
@@ -19,18 +69,18 @@ function uploadAndGetShareCodes(data) {
     if (process.env.XXOO_HOST && process.env.XXOO_TOKEN) {
         var host = process.env.XXOO_HOST;
         var token = process.env.XXOO_TOKEN;
-        var askPtPin=process.env.XXOO_FOR;
+        var askPtPin = process.env.XXOO_FOR;
         var ops = {
             'url': `${host}/uploadAndGetCodes?token=${token}&askFor=${askPtPin}`,
             'headers': {
                 "Content-Type": "application/json",
             },
-            'body':JSON.stringify(data)
+            'body': JSON.stringify(data)
         }
         $.post(ops, async (err, resp, data) => {
                 console.log("EOF");
                 console.log("##====================  xxoo池响应   ======")
-                console.log('%s',data);
+                console.log('%s', data);
             }
         );
     }
@@ -41,51 +91,102 @@ function uploadAndGetShareCodes(data) {
  * 读取互助码
  * @returns {null}
  */
-function readCodesFrom(){
-    var res=null;
-    if(process.env.XXOO_READ_SHARE_CODE){
-        res=readCodesFrom_get_share_code_js_log(process.env.XXOO_READ_SHARE_CODE);
-    }else{
-        res=readGet_share_codeFromDir();
+function readCodesFrom() {
+    var getShareCodeRes = null;
+
+    // 从 jd_get_share_code脚本日志中获取助力码
+    if (process.env.XXOO_READ_SHARE_CODE) {
+        getShareCodeRes = getShareCodeFrom_get_share_code_js_log_ByDir(process.env.XXOO_READ_SHARE_CODE);
+    } else {
+        getShareCodeRes = getShareCodeFrom_get_share_code_js_log_ByAutoJudge();
     }
+
+    // 从 code.sh 脚本日志中获取助力码
+    var codeShRes=getShareCodeFrom_code();
+
+    //合并两个脚本日志的助力码
+    var res={};
+    for (let ptPin of ptPins) {
+        var a=getShareCodeRes[ptPin];
+        var b=codeShRes[ptPin];
+        var mergedCodes = {};
+        mergedCodes=Object.assign(a==undefined?{}:a,mergedCodes);
+        mergedCodes=Object.assign(b==undefined?{}:b,mergedCodes,);
+        res[ptPin] = mergedCodes;
+    }
+
     return res;
 }
 
-function readGet_share_codeFromDir(){
-    console.log(`========>自动判断 jd_get_share_code 日志所在目录 开始`);
-    var pathName=`${process.env.QL_DIR}/log`;
-    var dirs=fs.readdirSync(pathName);
-    for (let i = 0; i < dirs.length; i++) {
-        if (dirs[i].endsWith("get_share_code")) {
-            console.log(`========>自动判断get_share_code 日志所在目录 ${dirs[i]}`);
-            return readCodesFrom_get_share_code_js_log(dirs[i]);
+/**
+ * 从code.sh脚本日志中获取助力码
+ */
+function getShareCodeFrom_code() {
+    var data = getLastFileDataFromDir('code');
+    if (data != null) {
+        res={};
+        for (let key in envsCodeSh) {
+            var env=envsCodeSh[key];
+            for (let i = 0; i < ptPins.length; i++) {
+                var pt_pin=ptPins[i];
+                var code=readFrom(`${key}${i+1}\=\'`,"\'\n",data,0);
+                if (code.start < 0) {
+                    continue;
+                }
+                if (!res[pt_pin]) {
+                    res[pt_pin] = {};
+                }
+                res[pt_pin][env] = code.str;
+            }
         }
-    }
-}
-
-function readCodesFrom_get_share_code_js_log(subDir) {
-    var pathName = `${process.env.QL_DIR}/log/${subDir}`
-    console.log(`\r\n从\r\n  ${pathName} \r\n目录解析日志最新获取的互助码\r\n\r\n`);
-    var files=fs.readdirSync(pathName);
-    if(files.length>0){
-        var lastLog=files[files.length-1];
-        var file = fs.readFileSync(`${pathName}/${lastLog}`, "utf8");
-        return parseFrom_get_share_code_js_log(file);
+        return res;
     }
     return {};
 }
 
+
+function getShareCodeFrom_get_share_code_js_log_ByAutoJudge() {
+    console.log(`========>自动判断 jd_get_share_code 日志所在目录 开始`);
+    var pathName = `${process.env.QL_DIR}/log`;
+    var dirs = fs.readdirSync(pathName);
+    for (let i = 0; i < dirs.length; i++) {
+        if (dirs[i].endsWith("get_share_code")) {
+            console.log(`========>自动判断 jd_get_share_code 日志所在目录 ${dirs[i]}`);
+            return getShareCodeFrom_get_share_code_js_log_ByDir(dirs[i]);
+        }
+    }
+    return {};
+}
+
+function getShareCodeFrom_get_share_code_js_log_ByDir(dir) {
+    var data = getLastFileDataFromDir(dir);
+    if (data == null) {
+        return {};
+    }
+    return parseFrom_get_share_code_js_log(data);
+}
+
+/**
+ * 获取给定目录里的最新文件内容
+ * @param dir
+ * @returns {null|*}
+ */
+function getLastFileDataFromDir(dir) {
+    var pathName = `${process.env.QL_DIR}/log/${dir}`;
+    if (!fs.existsSync(pathName)) {
+        return null;
+    }
+    var files = fs.readdirSync(pathName);
+    if (files.length > 0) {
+        var lastLog = files[files.length - 1];
+        var data = fs.readFileSync(`${pathName}/${lastLog}`, "utf8");
+        return data;
+    }
+    return null;
+}
+
 function parseFrom_get_share_code_js_log(data) {
-    var envs = {
-        "京东农场": "FRUITSHARECODES",
-        "京东萌宠": "PETSHARECODES",
-        "种豆得豆": "PLANT_BEAN_SHARECODES",
-        "东东工厂": "DDFACTORY_SHARECODES",
-        "京喜农场": "JXNC_SHARECODES",
-        "闪购盲盒": "JDSGMH_SHARECODES",
-        "签到领现金": "JD_CASH_SHARECODES",
-        "京喜工厂":"DREAM_FACTORY_SHARE_CODES"
-    };
+
 
     var res = {};
 
@@ -108,7 +209,7 @@ function parseFrom_get_share_code_js_log(data) {
             var code = readAfter("】", line.str, 0).str;
             var pt_pin = readFrom("（", "）", line.str, 0).str;
             var name = readFrom("）", "】", line.str).str;
-            var env = envs[name];
+            var env = envsGetShareCodeJs[name];
             if (!checkChinese(code) && pt_pin != '') {
                 if (!res[pt_pin]) {
                     res[pt_pin] = {};
@@ -123,18 +224,23 @@ function parseFrom_get_share_code_js_log(data) {
 }
 
 
-
 /**
  * 从给定的str中截取start和end之间的字符串
+ * 不包括start和end自己
  * @param startIdx: 从哪个位置开始查找
  */
-function readFrom(start,end,str,startIdx){
-    var s=str.indexOf(start,startIdx);
-    var e=str.indexOf(end,s+1);
-    var o={
-        str:str.substring(s+1,e),
-        start:s,
-        end:e
+function readFrom(start, end, str, startIdx) {
+    var s = str.indexOf(start, startIdx);
+    var e = str.indexOf(end, s+start.length);
+    var o = {
+        str: str.substring(s + start.length, e),
+        start: s,
+        end: e
+    }
+    if (s < 0 || e < 0|| s === e) {
+        o.str = "";
+        o.start = -1;
+        o.end = -1;
     }
     return o;
 }
@@ -143,11 +249,11 @@ function readFrom(start,end,str,startIdx){
  *  从给定的str中截取start到最后的字符串，不包括start
  *  @param startIdx: 从哪个位置开始查找
  */
-function readAfter(start,str,startIdx){
-    var s=str.indexOf(start,startIdx);
-    var o={
-        str:str.substring(s+1,str.length),
-        start:s
+function readAfter(start, str, startIdx) {
+    var s = str.indexOf(start, startIdx);
+    var o = {
+        str: str.substring(s + 1, str.length),
+        start: s
     }
 
     return o;
