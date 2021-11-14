@@ -6,36 +6,42 @@ require_once './util.php';
 
 // 用户校验和获取
 $user = getUser($_GET[TOKEN_PARAMETER_NAME]);
-$userId=$user['ID'];
-$limited=$user['LIMITED'];
+$userId = $user['ID'];
+$limited = $user['LIMITED'];
 //用户上传的助力码数量校验
-recordLimitCheck($userId,$limited);
+recordLimitCheck($userId, $limited);
 
 //每次被请求都先清理超过2周没有更新的数据
 cleanByRul();
 
+$response = ['data' => ''];
+
+
 $res = "";
+$testData = [];
 switch ($_SERVER['PATH_INFO']) {
     case '/uploadAndGetCodes':
-        $res = uploadAndGetCodes($userId, $GLOBALS['HTTP_RAW_POST_DATA']);
-        resRaw($res);
+        $res = uploadAndGetCodes($user, $GLOBALS['HTTP_RAW_POST_DATA']);
+        resAppend($response, $res);
         break;
     default :
         res(400, '不盈利，不推广，自用！！，请勿攻击');
         break;
 }
+resRaw($response['data']);
 
-function cleanByRul(){
+function cleanByRul()
+{
     global $db;
-    $ctime=time()-1209600;//2周前
-    $count=$db->count('share_code',[
-        'CREATE_TIME[<]'=>$ctime
+    $ctime = time() - 1209600;//2周前
+    $count = $db->count('share_code', [
+        'CREATE_TIME[<]' => $ctime
     ]);
     //为什么要先查询再执行update? 因为sqlite执行修改时会锁定文件导致并发下降,但是可以共享读
-    if ($count>100) {
+    if ($count > 100) {
         //大于100判断是为了减少进行删除的频率
-        $db->delete('share_code',[
-            'CREATE_TIME[<]'=>$ctime
+        $db->delete('share_code', [
+            'CREATE_TIME[<]' => $ctime
         ]);
     }
 }
@@ -45,14 +51,15 @@ function cleanByRul(){
  * @param $userId
  * @param $limited
  */
-function recordLimitCheck($userId,$limited){
+function recordLimitCheck($userId, $limited)
+{
     global $db;
-    $count=$db->count('share_code',[
-        'USER_ID'=>$userId
+    $count = $db->count('share_code', [
+        'USER_ID' => $userId
     ]);
 
-    if ($count>$limited) {
-        res(400,'当前用户token上传的助力码数量已超标');
+    if ($count > $limited) {
+        res(400, '当前用户token上传的助力码数量已超标');
     }
 }
 
@@ -60,12 +67,52 @@ function recordLimitCheck($userId,$limited){
  * @param $userId
  * @param $data
  */
-function uploadAndGetCodes($userId, $data)
+function uploadAndGetCodes($user, $req)
 {
-    $data = json_decode($data, true);
-    uploadjson($userId, $data);
+    global $response;
+    $userId = $user['ID'];
+    $data = json_decode($req, true);
+
+    //根据请求数据的版本判断是否需要更新数据库，如果需要，
+    $newVersion = getNewVersionIfNeedUpdate($user, $req);
+    if ($newVersion != null) {
+        slog($response, " 更新助力码版本 ${newVersion}");
+        uploadjson($userId, $data);
+        updateUserDataVersion($user, $newVersion);
+    }
+    //获取助力码返回给客户端
     $r = getCodes($userId, $data);
     return $r;
+}
+
+function getNewVersionIfNeedUpdate($user, $req)
+{
+    $reqMd5 = md5($req);
+    $oldMd5 = $user['DATA_VERSION'];
+    $res = null;
+    if ($reqMd5 == $oldMd5) {
+        $dbUpdateTime = $user['UPDATED_TIME'];
+        if ((time() - $dbUpdateTime) > MAX_NO_UPDATE_DAY) {
+            $res = $reqMd5;
+        }
+    } else {
+        $res = $reqMd5;
+    }
+    return $res;
+}
+
+function updateUserDataVersion($user, $dataVersion)
+{
+    global $db, $response;
+    $res = $db->update('user',
+        [
+            'DATA_VERSION' => $dataVersion,
+            'UPDATED_TIME' => time()
+        ],
+        [
+            'ID' => $user['ID']
+        ]);
+    slog($response, json_encode($res));
 }
 
 function uploadjson($userId, $data)
@@ -129,7 +176,7 @@ function getCodes($userId, $req)
     //请求要求的互助码
     $askFor = askFor($_GET['askFor']);
 
-    $finalEnvCodes = mergeCodesByEnv($envNames, $envNames, $dbEnvs, $askFor);
+    $finalEnvCodes = mergeCodesByEnv($envNames, $envNames, $askFor, $dbEnvs);
 
     $res = mergeDbEnvAndReqEnv($finalEnvCodes, $req);
     return $res;
@@ -160,8 +207,8 @@ function mergeDbEnvAndReqEnv($finalEnvCodes, $req)
         $sh = "export ${env}=\"${allPtPinEnvCodes}\"\r\n";
         $shell = "${shell}${sh}";
     }
-    $date=date('Y年m月d日 H:i:s');
-    $shell="${shell}export GENERATE_INFO=\"xxoo助力池同步时间===========》 ${date}\"\r\n";
+    $date = date('Y年m月d日 H:i:s');
+    $shell = "${shell}export GENERATE_INFO=\"xxoo助力池同步时间===========》 ${date}\"\r\n";
     return $shell;
 }
 
@@ -176,17 +223,19 @@ function mergeDbEnvAndReqEnv($finalEnvCodes, $req)
  */
 function mergeCodesByEnv($allEnvNames, ...$b)
 {
+
     $merges = [];
     foreach ($allEnvNames as $env => $va) {
         $tmpCodes = [];
         foreach ($b as $k => $envCodes) {
             if (isset($envCodes[$env])) {
-                $tmpCodes = array_merge($tmpCodes,$envCodes[$env]);
+                $tmpCodes = arrayPushArray($tmpCodes, $envCodes[$env]);
             }
         }
         $tmpCodes = array_unique($tmpCodes);
         $merges[$env] = $tmpCodes;
     }
+
     return $merges;
 }
 
