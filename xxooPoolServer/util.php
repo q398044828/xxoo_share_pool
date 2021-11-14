@@ -22,7 +22,8 @@ function test(&$testData, $key, $data)
 
 function slog(&$res,$str)
 {
-    $res['data'] = $res['data'] . "\r\n# log=>${str}\r\n";
+    $res['data'] = $res['data'] . "# log=>${str}
+";
 }
 function resAppend(&$res,$appendStr){
     $res['data'] = $res['data'] . $appendStr;
