@@ -58,6 +58,8 @@ var envsCodeSh = {
 };
 
 var codes = readCodesFrom();
+
+console.log('-----整合后的助力码------------');
 console.log(codes);
 uploadAndGetShareCodes(codes);
 
@@ -100,9 +102,14 @@ function readCodesFrom() {
     } else {
         getShareCodeRes = getShareCodeFrom_get_share_code_js_log_ByAutoJudge();
     }
-
+    console.log('------ 从 get_share_code 日志中获取到的助力码');
+    console.log(getShareCodeRes);
     // 从 code.sh 脚本日志中获取助力码
     var codeShRes=getShareCodeFrom_code();
+
+    console.log('------- 从 code.sh脚本 日志中获取到的助力码');
+    console.log(codeShRes);
+
 
     //合并两个脚本日志的助力码
     var res={};
@@ -114,6 +121,7 @@ function readCodesFrom() {
         mergedCodes=Object.assign(b==undefined?{}:b,mergedCodes,);
         res[ptPin] = mergedCodes;
     }
+
 
     return res;
 }
