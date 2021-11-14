@@ -181,7 +181,7 @@ function mergeCodesByEnv($allEnvNames, ...$b)
         $tmpCodes = [];
         foreach ($b as $k => $envCodes) {
             if (isset($envCodes[$env])) {
-                $tmpCodes = array_merge($envCodes[$env], $tmpCodes);
+                $tmpCodes = array_merge($tmpCodes,$envCodes[$env]);
             }
         }
         $tmpCodes = array_unique($tmpCodes);
