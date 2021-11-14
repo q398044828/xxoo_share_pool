@@ -8,7 +8,8 @@
 - 多账户自助
 - 可搭建自己的服务池
 
-[加入频道点我](https://t.me/xxoo_pool)
+[加入telegram频道点我](https://t.me/xxoo_pool) <br/>
+https://t.me/xxoo_pool
 
 说明：<br/>
 
