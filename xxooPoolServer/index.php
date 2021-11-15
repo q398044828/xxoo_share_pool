@@ -1,5 +1,6 @@
 <?php
 
+require_once './config.php';
 require_once './db.php';
 require_once './util.php';
 
@@ -282,4 +283,15 @@ EOF;
     return array_unique($codes);
 }
 
+function getUser($token)
+{
+    global $db;
+    $user = $db->select('user', ['ID', 'LIMITED', 'DATA_VERSION', 'UPDATED_TIME'], [
+        'TOKEN' => $token
+    ]);
+    if (count($user) < 1) {
+        res(400, 'token不存在');
+    }
+    return $user[0];
+}
 

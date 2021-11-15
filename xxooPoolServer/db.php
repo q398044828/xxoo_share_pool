@@ -1,6 +1,5 @@
 <?php
 require_once './medoo.php';
-require_once './config.php';
 
 
 $db = new medoo([

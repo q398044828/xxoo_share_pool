@@ -58,14 +58,19 @@ function resRaw($data)
     die($data);
 }
 
-function getUser($token)
+
+function startsWith($haystack, $needle)
 {
-    global $db;
-    $user = $db->select('user', ['ID', 'LIMITED', 'DATA_VERSION', 'UPDATED_TIME'], [
-        'TOKEN' => $token
-    ]);
-    if (count($user) < 1) {
-        res(400, 'token不存在');
+    $length = strlen($needle);
+    return (substr($haystack, 0, $length) === $needle);
+}
+
+function endsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    if ($length == 0) {
+        return true;
     }
-    return $user[0];
+
+    return (substr($haystack, -$length) === $needle);
 }
