@@ -113,7 +113,7 @@ function updateUserDataVersion($user, $dataVersion)
         [
             'ID' => $user['ID']
         ]);
-    slog($response, json_encode($res));
+    slog($response, "数据更新状态：".json_encode($res));
 }
 
 function uploadjson($userId, $data)
@@ -204,7 +204,7 @@ function mergeDbEnvAndReqEnv($finalEnvCodes, $req)
         foreach ($req as $ptPin => $envs) {
             $reqEnvCode = $envs[$env];
             $ptPinMergedCodes = array_diff($codes, [$reqEnvCode]);
-            $ptPinMergedCodes=array_filter($ptPinMergedCodes);
+            $ptPinMergedCodes = array_filter($ptPinMergedCodes);
             $ptPinMergedCodes = implode("@", $ptPinMergedCodes);
             $allPtPinEnvCodes[] = $ptPinMergedCodes;
         }
@@ -246,21 +246,34 @@ function mergeCodesByEnv($allEnvNames, ...$b)
 
 function askFor($askFor)
 {
-    global $db;
+    global $db,$response;
     $askFor = explode("@", $askFor);
-    $res = $db->select('share_code', ['ENV', 'CODE'], [
+    $res = $db->select('share_code', ['ENV', 'CODE', 'PT_PIN'], [
         'PT_PIN' => $askFor
     ]);
+
+
+    /**
+     * 转成格式且根据传入的askFor顺序进行code的排序
+     * [
+     *     'env1':['1','2'],
+     *     'env2':['a','b']
+     * ]
+     */
     $codes = [];
+    $askForOrder=array_flip($askFor);
     foreach ($res as $envCode) {
         $env = $envCode['ENV'];
         $code = $envCode['CODE'];
         if (!isset($codes[$env])) {
             $codes[$env] = [];
         }
-        $codes[$env][] = $code;
+        $order=$askForOrder[$envCode['PT_PIN']];
+        $codes[$env][$order] = $code;
     }
-
+    foreach ($codes as $env=>&$envCodes){
+        ksort($envCodes);
+    }
     return $codes;
 }
 
