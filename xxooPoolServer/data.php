@@ -19,6 +19,9 @@ switch ($argv[1]) {
         sql($argv[2]);
         break;
     case 'run':
+        //使用方式： php data.php run db.sql 1 2 3 4
+        //其中 1 2 3 4表示sql位置，对应sql文件中的[1] [2] [3] [4] 标记的位置，
+        //也可以：php data.php run db.sql 表示执行所有sql
         $file = $argv[2];
         unset($argv[0]);
         unset($argv[1]);
