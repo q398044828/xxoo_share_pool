@@ -128,6 +128,9 @@ function uploadjson($userId, $data)
 
 function saveShareCode($userId, $ptPin, $env, $code)
 {
+    if ($code == '' || $code == null) {
+        return false;
+    }
     global $db;
     //先尝试修改，修改成功则表示已经存在
     $data = [
@@ -200,6 +203,7 @@ function mergeDbEnvAndReqEnv($finalEnvCodes, $req)
         foreach ($req as $ptPin => $envs) {
             $reqEnvCode = $envs[$env];
             $ptPinMergedCodes = array_diff($codes, [$reqEnvCode]);
+            $ptPinMergedCodes=array_filter($ptPinMergedCodes);
             $ptPinMergedCodes = implode("@", $ptPinMergedCodes);
             $allPtPinEnvCodes[] = $ptPinMergedCodes;
         }
