@@ -14,3 +14,25 @@ const MAX_NO_UPDATE_DAY = 432000;//互助码上报时，最长不更新CREATE_TI
  * Password: 填你自己设置的密码
  */
 const DB_PASSWORD = "test_pass";
+
+/**
+ * 助力次数配置
+ * [a,b]
+ * a: 需要助力的次数
+ * b: 可提供助力次数
+ */
+const HELP_NUM = [
+    'FRUITSHARECODES' => [5, 3],                //京东农场
+    'PETSHARECODES' => [5, 5],                  //京东萌宠
+    'PLANT_BEAN_SHARECODES' => [9, 3],          //种豆得豆
+    'DDFACTORY_SHARECODES' => [5, 3],           //东东工厂
+    'DREAM_FACTORY_SHARE_CODES' => [15, 3],     //京喜工厂
+    'JDZZ_SHARECODES' => [5, 2],                //京东赚赚
+    'JDJOY_SHARECODES' => [6, 1],               //疯狂的JOY
+    'BOOKSHOP_SHARECODES' => [10, 1],           //京东书店
+    'JD_CASH_SHARECODES' => [10, 1],            //签到领现金
+    'JDSGMH_SHARECODES' => [10, 1],             //闪购盲盒
+    'JDCFD_SHARECODES' => [5, 5],               //京喜财富岛
+    'JDHEALTH_SHARECODES' => [5, 5],            //东东健康
+    'CITY_SHARECODES' => [5, 5]                 //城城领现金
+];
