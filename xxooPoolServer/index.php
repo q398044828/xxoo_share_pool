@@ -39,11 +39,11 @@ function clientVersionChekc($clientVersion)
 {
     global $response;
     if ($clientVersion !== CLIENT_VERSION) {
-        slog($response, "========== 更新提示 ============");
+        slog($response, "================== 更新提示 ============");
         slog($response, "");
-        slog($response, "       请更新xxoo.js版本");
+        slog($response, "              请更新xxoo.js版本");
         slog($response, "");
-        slog($response, "===============================");
+        slog($response, "=======================================");
         slog($response, "");
     }
 }
