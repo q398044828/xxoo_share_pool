@@ -37,22 +37,44 @@ https://t.me/xxoo_pool
 
 # 食用方法
 
-- 1.青龙面板->对比工具 右上角的当前文件选择 task_before.sh, 追加本项目的task_before.sh中的内容(如果以前做过这个操作，请替换之前追加的内容)
+- 1.青龙面板->对比工具 右上角的当前文件选择 task_before.sh, 追加以下内容到脚本中
+<code>
+        ## ======重要提示： 如果是追加到已经存在的 task_before.sh 中，则只拷贝以下内容
+        xxooLogDir="${dir_log}/raw_main_xxoo"
+        if [[ $(ls $xxooLogDir) ]]; then
+            latest_log=$(ls -r $xxooLogDir | head -1)
+            . $xxooLogDir/$latest_log
+            echo "##  task before  $xxooLogDir/$latest_log"
+            echo "##  $GENERATE_INFO";
+        fi
+</code>
+        
 - 2.青龙面板->环境变量 新增以下环境变量
 
 
-        XXOO_HOST = https://sharec.siber.cn:889                   必填
+        名称:     XXOO_HOST                                       必填
+        值:      https://sharec.siber.cn:889   
+                
         当你不想用默认助力池时，填入你要用的xxoo助力池地址,默认为作者提供的地址
         当你要用其他人自建服务池时，请修改XXOO_HOST值
+        
     
-        XXOO_TOKEN = dev_token                                    必填
+        名称:     XXOO_TOKEN 
+        值:       dev_token                                       必填
+        
         接入服务池的验证token,本人自建的服务池提供一个token
         当你使用其他人的自建服池或者提示数量限制时，请向服务池所有者反馈
 
-        XXOO_FOR = pt_pin1@pt_pin2                                选填
-        需要定向助力谁，具体请参考定向助力说明
 
-        XXOO_CLOSE_SELF = true                                    选填
+        名称:     XXOO_FOR                                        选填
+        值:       pt_pin1@pt_pin2                                
+        
+        填你想要助力的人，具体请参考定向助力说明
+
+
+        名称:     XXOO_CLOSE_SELF
+        值:       true                                           选填
+        
         是否关闭多账号自助，关闭为true,不关为false,不填为不关
         多个小号养大号但是小号本身不需要被助力时使用此开关
         注意：很多脚本默认开启多账户自助，此种情况本脚本无法控制
