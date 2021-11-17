@@ -285,6 +285,7 @@ function getCodes($userId, $req, $askFor)
             $envNames[$env][] = $code;
         }
     }
+    $reqCodes = $_GET['closeSelf'] === true ? [] : $envNames;
 
     // 数据库的互助码
     $dbEnvs = [];
@@ -296,7 +297,7 @@ function getCodes($userId, $req, $askFor)
     //请求要求的互助码
     $askForCodes = askFor($askFor);
 
-    $finalEnvCodes = mergeCodesByEnv($envNames, $envNames, $askForCodes, $dbEnvs);
+    $finalEnvCodes = mergeCodesByEnv($envNames, $reqCodes, $askForCodes, $dbEnvs);
 
     $res = mergeDbEnvAndReqEnv($finalEnvCodes, $req);
     return $res;
