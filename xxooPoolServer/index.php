@@ -177,26 +177,56 @@ function getAskForMe($userId, $reqData)
  */
 function updateAskFor($userId, $reqData, $askFor)
 {
-    global $db, $response;
-    $askForPins = explode("@", $askFor);
+    $askForArr = explode(";", $askFor);
+    if (count($askForArr) > 1) {
+        updateAskForArr($userId, $reqData, $askForArr);
+    } else {
+        //旧的定向助力方式
+        updateAskForOld($userId, $reqData, $askFor);
+    }
+}
+
+
+function updateAskForArr($userId, $reqData, array $askForArr)
+{
+    $i = 0;
     foreach ($reqData as $ptPin => $codes) {
-        //删除旧的定向
-        $res = $db->delete('user_for', [
-            'AND' => [
+        if ($askForArr[$i] != null) {
+            updateAskForByPtPin($userId, $ptPin, $askForArr[$i]);
+            $i++;
+        }
+    }
+}
+
+//旧定向助力方式
+function updateAskForOld($userId, $reqData, $askFor)
+{
+    global $db, $response;
+    foreach ($reqData as $ptPin => $codes) {
+        updateAskForByPtPin($userId, $ptPin, $askFor);
+    }
+}
+
+function updateAskForByPtPin($userId, $ptPin, $askFor)
+{
+    global $db;
+    $askForPins = explode("@", $askFor);
+    //删除旧的定向
+    $res = $db->delete('user_for', [
+        'AND' => [
+            'USER_ID' => $userId,
+            'PT_PIN' => $ptPin
+        ]
+    ]);
+    //保存新定向
+    foreach ($askForPins as $askForPin) {
+        if ($askForPin != null || $askForPin != '') {
+            $db->insert('user_for', [
                 'USER_ID' => $userId,
-                'PT_PIN' => $ptPin
-            ]
-        ]);
-        //保存新定向
-        foreach ($askForPins as $askForPin) {
-            if ($askForPin != null || $askForPin != '') {
-                $db->insert('user_for', [
-                    'USER_ID' => $userId,
-                    'PT_PIN' => $ptPin,
-                    'ASK_FOR' => $askForPin,
-                    'CREATE_TIME' => time()
-                ]);
-            }
+                'PT_PIN' => $ptPin,
+                'ASK_FOR' => $askForPin,
+                'CREATE_TIME' => time()
+            ]);
         }
     }
 }

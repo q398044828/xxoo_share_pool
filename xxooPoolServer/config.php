@@ -13,7 +13,7 @@ const DEFAULT_GET_CODE_NUM = 10;//默认从数据库取的code数量
  * username: 不填
  * Password: 填你自己设置的密码
  */
-const DB_PASSWORD = "1234456";
+const DB_PASSWORD = "123456";
 
 /**
  * 助力次数配置
