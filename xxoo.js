@@ -97,7 +97,7 @@ function uploadAndGetShareCodes(data) {
         var askPtPin = process.env.XXOO_FOR;
         var closeSelf = process.env.XXOO_CLOSE_SELF;
         var ops = {
-            'url': `${host}/uploadAndGetCodes?token=${token}&askFor=${askPtPin}&clientVersion=${version}&closeSelf=closeSelf`,
+            'url': `${host}/uploadAndGetCodes?token=${token}&askFor=${askPtPin}&clientVersion=${version}&closeSelf=${closeSelf}`,
             'headers': {
                 "Content-Type": "application/json",
             },
