@@ -147,7 +147,7 @@ export GENERATE_INFO="xxoo助力池同步时间===========》 2021年11月13日 
     方式2：
         配置环境变量： XXOO_FOR = pt_pin1;pt_pin2@pt_pin3;pt_pin4
         说明：第一个账号助力pt_pin1，
-             第二个账号助力pt_pin1和pt_pin2,
+             第二个账号助力pt_pin2 和 pt_pin3,
              第三个账号助力pt_pin4
 
     pt_pin: jd用户的pt_pin参数值
