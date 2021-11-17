@@ -59,7 +59,7 @@ https://t.me/xxoo_pool
         命令：ql raw https://raw.githubusercontent.com/q398044828/xxoo_share_pool/main/xxoo.js
         定时规则：0 0 */1 * *
         
-        配置好后立即执行一遍
+        配置好后立即执行一遍，会新增一个定时任务：xxoo互助池,此任务即为助力池脚本
 
 
 - 接入是否成功检测：
