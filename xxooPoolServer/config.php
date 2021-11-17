@@ -4,6 +4,7 @@ const DB_URL = 'shareCode.db';
 const TOKEN_PARAMETER_NAME = 'token';
 const MAX_NO_UPDATE_DAY = 432000;//互助码上报时，最长不更新CREATE_TIME的时间，单位秒 432000=5天
 const CLIENT_VERSION = '1.0.0'; //客户端版本，用于提示xxoo.js版本需要更新
+const DEFAULT_GET_CODE_NUM = 10;//默认从数据库取的code数量
 /**
  * 数据库密码，管理作用,这里需要修改成你自己的
  * 管理地址：/dbmanager.php
@@ -12,7 +13,7 @@ const CLIENT_VERSION = '1.0.0'; //客户端版本，用于提示xxoo.js版本需
  * username: 不填
  * Password: 填你自己设置的密码
  */
-const DB_PASSWORD = "123456";
+const DB_PASSWORD = "1234456";
 
 /**
  * 助力次数配置

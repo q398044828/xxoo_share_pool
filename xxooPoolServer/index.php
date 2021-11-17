@@ -21,13 +21,12 @@ recordLimitCheck($userId, $limited);
 cleanByRule();
 
 
-
-
 $res = "";
 $testData = [];
 switch ($_SERVER['PATH_INFO']) {
     case '/uploadAndGetCodes':
         $res = uploadAndGetCodes($user, $GLOBALS['HTTP_RAW_POST_DATA'], $_GET['askFor']);
+        slog($response, "  ↓↓↓↓↓↓↓↓↓↓↓↓ 以下为下发的助力码 ↓↓↓↓↓↓↓↓↓↓↓↓");
         resAppend($response, $res);
         break;
     default :
@@ -36,15 +35,16 @@ switch ($_SERVER['PATH_INFO']) {
 }
 resRaw($response['data']);
 
-function clientVersionChekc($clientVersion){
+function clientVersionChekc($clientVersion)
+{
     global $response;
-    if ($clientVersion!==CLIENT_VERSION) {
-        slog($response,"========== 更新提示 ============");
-        slog($response,"");
-        slog($response,"       请更新xxoo.js版本");
-        slog($response,"");
-        slog($response,"===============================");
-        slog($response,"");
+    if ($clientVersion !== CLIENT_VERSION) {
+        slog($response, "========== 更新提示 ============");
+        slog($response, "");
+        slog($response, "       请更新xxoo.js版本");
+        slog($response, "");
+        slog($response, "===============================");
+        slog($response, "");
     }
 }
 
@@ -96,11 +96,28 @@ function uploadAndGetCodes($user, $req, $askFor)
     if ($newVersion != null) {
         slog($response, " 更新助力码版本 ${newVersion}");
         uploadjson($userId, $data);
-        updateAskFor($userId,$data,$askFor);
+        updateAskFor($userId, $data, $askFor);
         updateUserDataVersion($user, $newVersion);
     }
+
     //获取助力码返回给客户端
     $r = getCodes($userId, $data, $askFor);
+
+    //获取定向信息
+    $askForMe = getAskForMe($userId, $data);
+    slog($response, "");
+    if (count($askForMe) > 0) {
+        slog($response, " ================== 定向您的用户 ============");
+        slog($response, "");
+        foreach ($askForMe as $me) {
+            slog($response, "   $me");
+        }
+    } else {
+        slog($response, " ==================== 定向您的用户 ============");
+        slog($response, "");
+        slog($response, "       当前没有用户定向你，快去邀请几个朋友定向你！！！");
+    }
+    slog($response, "");
     return $r;
 }
 
@@ -134,11 +151,53 @@ function updateUserDataVersion($user, $dataVersion)
     slog($response, " 数据更新状态：" . json_encode($res));
 }
 
-function updateAskFor($userId,$reqData,$askFor)
+/**
+ * 获取定向自己的用户
+ */
+function getAskForMe($userId, $reqData)
 {
-    $askForPins = explode("@", $askFor);
-    foreach ($askForPins as $ptPin) {
+    $ptPins = array_keys($reqData);
+    if (count($ptPins) > 0) {
+        global $db;
+        $askForMe = $db->select('user_for', ['PT_PIN', 'ASK_FOR'], ['ASK_FOR' => $ptPins]);
+        $res = [];
+        foreach ($askForMe as $k => $v) {
+            $res[] = $v['PT_PIN'] . ' 助力=> ' . $v['ASK_FOR'];
+        }
+        return $res;
+    }
+    return null;
+}
 
+/**
+ * 保存定向助力
+ * @param $userId
+ * @param $reqData
+ * @param $askFor
+ */
+function updateAskFor($userId, $reqData, $askFor)
+{
+    global $db, $response;
+    $askForPins = explode("@", $askFor);
+    foreach ($reqData as $ptPin => $codes) {
+        //删除旧的定向
+        $res = $db->delete('user_for', [
+            'AND' => [
+                'USER_ID' => $userId,
+                'PT_PIN' => $ptPin
+            ]
+        ]);
+        //保存新定向
+        foreach ($askForPins as $askForPin) {
+            if ($askForPin != null || $askForPin != '') {
+                $db->insert('user_for', [
+                    'USER_ID' => $userId,
+                    'PT_PIN' => $ptPin,
+                    'ASK_FOR' => $askForPin,
+                    'CREATE_TIME' => time()
+                ]);
+            }
+        }
     }
 }
 
@@ -170,6 +229,7 @@ function saveShareCode($userId, $ptPin, $env, $code)
     $n = $db->update('share_code', $data, [
         'CODE' => $code,
         'ENV' => $env,
+        'USER_ID' => $userId
     ]);
     if ($n < 1) {
         $res = $db->insert('share_code', $data);
@@ -314,7 +374,8 @@ function getCodesByEnvFromDB($env)
     $sql = <<<EOF
     select CODE from share_code where env = $argEnv
 EOF;
-    $canHelpNum = HELP_NUM[$env][1] + 2;//+2是为了防止随机获取到用户自己的导致不够
+    //HELP_NUM[$env][1] + 2;//+2是为了防止随机获取到用户自己的导致不够
+    $canHelpNum = DEFAULT_GET_CODE_NUM;//为什么还是改成大于可助力次数的值？因为有可能下发的已经被助力过了
     $res = $db->query($sql . " ORDER BY RANDOM() limit " . $canHelpNum)->fetchAll();
     $codes = [];
     foreach ($res as $r) {
