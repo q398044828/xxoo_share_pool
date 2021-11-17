@@ -36,39 +36,30 @@ https://t.me/xxoo_pool
 
 # 食用方法
 
-- 青龙面板->脚本管理 新增xxoo.js,将xxooPoolClient/scripts/xxoo.js内容拷贝进去
-- 青龙面板->对比工具 右上角的当前文件选择 task_before.sh, 追加xxooPoolClient/task_before.sh中的内容
+- 青龙面板->对比工具 右上角的当前文件选择 task_before.sh, 追加task_before.sh中的内容(如果以前做过这个操作，请替换之前追加的内容)
 - 青龙面板->环境变量 新增以下环境变量
 
 
-        XXOO_HOST               必填
-        当你不想用默认助力池时，填入你要用的xxoo助力池地址
-        本人自建服务池地址：
-        XXOO_HOST = https://sharec.siber.cn:889    
+        XXOO_HOST = https://sharec.siber.cn:889                   必填
+        当你不想用默认助力池时，填入你要用的xxoo助力池地址,默认为作者提供的地址
+        当你要用其他人自建服务池时，请修改XXOO_HOST值
     
-        XXOO_TOKEN              必填
+        XXOO_TOKEN = dev_token                                    必填
         接入服务池的验证token,本人自建的服务池提供一个token
-        XXOO_TOKEN = dev_token
+        当你使用其他人的自建服池或者提示数量限制时，请向服务池所有者反馈
 
-        XXOO_FOR                选填
+        XXOO_FOR                                                  选填
         有时候我们希望优先助力某些用户，则此变量为 
         你要定向助力的用户的pt_pin参数，多个时用@符号分隔
 
-        XXOO_READ_SHARE_CODE    选填
-        本项目依赖于原版的jd_get_share_code的执行日志，默认不需要填写，
-        除非你重命名了脚本名 不是以jd_get_share_code字符串结尾才需要填本字段
-    
+- 青龙面板->定时任务->添加定时任务
 
-- 青龙面板->定时任务 新增定时任务
 
-    
-        名称：         xxoo助力池             
-        命令：         task xxoo.js           说明：不可修改
-        定时规则：      0 0 0 */5 * *          说明：互助码不会变，
-                                                    但是服务器会定期清理不活跃的助力码，所以还是
-                                                    每5天同步一次即可，
-                                                    第一次配置可手动执行一次即可
-
+        名称：xxoo更新
+        命令：ql raw https://raw.githubusercontent.com/q398044828/xxoo_share_pool/main/xxoo.js
+        定时规则：0 0 */1 * *
+        
+        配置好后立即执行一遍
 
 
 - 接入是否成功检测：
@@ -129,6 +120,11 @@ export GENERATE_INFO="xxoo助力池同步时间===========》 2021年11月13日 
 
     </pre>
 </details>
+
+# 脚本更新
+
+- 自动更新：按照食用方法配置，即可每天晚上自动更新
+- 手动更新：当运行日志中提示： 请更新xxoo.js版本 时，请手动执行定时任务:xxoo更新
 
 # 定向互助说明
     

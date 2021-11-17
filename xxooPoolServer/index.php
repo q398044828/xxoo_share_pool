@@ -39,7 +39,9 @@ resRaw($response['data']);
 function clientVersionChekc($clientVersion){
     if ($clientVersion!==CLIENT_VERSION) {
         global $response;
-        slog($response,"=======> 请更新xxoo.js版本");
+        slog($response,"========== 更新提示 ============");
+        slog($response,"       请更新xxoo.js版本         ");
+        slog($response,"===============================");
     }
 }
 
