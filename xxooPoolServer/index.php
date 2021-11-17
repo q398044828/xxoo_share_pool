@@ -4,6 +4,11 @@ require_once './config.php';
 require_once './db.php';
 require_once './util.php';
 
+$response = ['data' => ''];
+
+
+//客户端版本检测
+clientVersionChekc($_GET['clientVersion']);
 
 // 用户校验和获取
 $user = getUser($_GET[TOKEN_PARAMETER_NAME]);
@@ -13,16 +18,16 @@ $limited = $user['LIMITED'];
 recordLimitCheck($userId, $limited);
 
 //每次被请求都先清理超过2周没有更新的数据
-cleanByRul();
+cleanByRule();
 
-$response = ['data' => ''];
+
 
 
 $res = "";
 $testData = [];
 switch ($_SERVER['PATH_INFO']) {
     case '/uploadAndGetCodes':
-        $res = uploadAndGetCodes($user, $GLOBALS['HTTP_RAW_POST_DATA']);
+        $res = uploadAndGetCodes($user, $GLOBALS['HTTP_RAW_POST_DATA'], $_GET['askFor']);
         resAppend($response, $res);
         break;
     default :
@@ -31,7 +36,14 @@ switch ($_SERVER['PATH_INFO']) {
 }
 resRaw($response['data']);
 
-function cleanByRul()
+function clientVersionChekc($clientVersion){
+    if ($clientVersion!==CLIENT_VERSION) {
+        global $response;
+        slog($response,"=======> 请更新xxoo.js版本");
+    }
+}
+
+function cleanByRule()
 {
     global $db;
     $ctime = time() - 1209600;//2周前
@@ -68,27 +80,28 @@ function recordLimitCheck($userId, $limited)
  * @param $userId
  * @param $data
  */
-function uploadAndGetCodes($user, $req)
+function uploadAndGetCodes($user, $req, $askFor)
 {
     global $response;
     $userId = $user['ID'];
     $data = json_decode($req, true);
 
     //根据请求数据的版本判断是否需要更新数据库，如果需要，
-    $newVersion = getNewVersionIfNeedUpdate($user, $req);
+    $newVersion = getNewVersionIfNeedUpdate($user, $req, $askFor);
     if ($newVersion != null) {
         slog($response, " 更新助力码版本 ${newVersion}");
         uploadjson($userId, $data);
+        updateAskFor($userId,$data,$askFor);
         updateUserDataVersion($user, $newVersion);
     }
     //获取助力码返回给客户端
-    $r = getCodes($userId, $data);
+    $r = getCodes($userId, $data, $askFor);
     return $r;
 }
 
-function getNewVersionIfNeedUpdate($user, $req)
+function getNewVersionIfNeedUpdate($user, $req, $askFor)
 {
-    $reqMd5 = md5($req);
+    $reqMd5 = md5($req . $askFor);
     $oldMd5 = $user['DATA_VERSION'];
     $res = null;
     if ($reqMd5 == $oldMd5) {
@@ -113,7 +126,15 @@ function updateUserDataVersion($user, $dataVersion)
         [
             'ID' => $user['ID']
         ]);
-    slog($response, "数据更新状态：".json_encode($res));
+    slog($response, "数据更新状态：" . json_encode($res));
+}
+
+function updateAskFor($userId,$reqData,$askFor)
+{
+    $askForPins = explode("@", $askFor);
+    foreach ($askForPins as $ptPin) {
+
+    }
 }
 
 function uploadjson($userId, $data)
@@ -155,7 +176,7 @@ function saveShareCode($userId, $ptPin, $env, $code)
 }
 
 
-function getCodes($userId, $req)
+function getCodes($userId, $req, $askFor)
 {
     global $db;
 
@@ -178,9 +199,9 @@ function getCodes($userId, $req)
     }
 
     //请求要求的互助码
-    $askFor = askFor($_GET['askFor']);
+    $askForCodes = askFor($askFor);
 
-    $finalEnvCodes = mergeCodesByEnv($envNames, $envNames, $askFor, $dbEnvs);
+    $finalEnvCodes = mergeCodesByEnv($envNames, $envNames, $askForCodes, $dbEnvs);
 
     $res = mergeDbEnvAndReqEnv($finalEnvCodes, $req);
     return $res;
@@ -246,7 +267,7 @@ function mergeCodesByEnv($allEnvNames, ...$b)
 
 function askFor($askFor)
 {
-    global $db,$response;
+    global $db, $response;
     $askFor = explode("@", $askFor);
     $res = $db->select('share_code', ['ENV', 'CODE', 'PT_PIN'], [
         'PT_PIN' => $askFor
@@ -261,17 +282,17 @@ function askFor($askFor)
      * ]
      */
     $codes = [];
-    $askForOrder=array_flip($askFor);
+    $askForOrder = array_flip($askFor);
     foreach ($res as $envCode) {
         $env = $envCode['ENV'];
         $code = $envCode['CODE'];
         if (!isset($codes[$env])) {
             $codes[$env] = [];
         }
-        $order=$askForOrder[$envCode['PT_PIN']];
+        $order = $askForOrder[$envCode['PT_PIN']];
         $codes[$env][$order] = $code;
     }
-    foreach ($codes as $env=>&$envCodes){
+    foreach ($codes as $env => &$envCodes) {
         ksort($envCodes);
     }
     return $codes;
@@ -288,7 +309,8 @@ function getCodesByEnvFromDB($env)
     $sql = <<<EOF
     select CODE from share_code where env = $argEnv
 EOF;
-    $res = $db->query($sql . " ORDER BY RANDOM() limit " . ENV_RANDOM_NUM)->fetchAll();
+    $canHelpNum = HELP_NUM[$env][1] + 2;//+2是为了防止随机获取到用户自己的导致不够
+    $res = $db->query($sql . " ORDER BY RANDOM() limit " . $canHelpNum)->fetchAll();
     $codes = [];
     foreach ($res as $r) {
         $codes[] = $r['CODE'];

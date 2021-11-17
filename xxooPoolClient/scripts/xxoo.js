@@ -1,6 +1,6 @@
 /*
  */
-
+var version='1.0.0';
 var fs = require("fs");
 console.log(":<<EOF");
 const $ = new Env("获取互助码+参与xxoo互助池");
@@ -91,7 +91,7 @@ function uploadAndGetShareCodes(data) {
         var token = process.env.XXOO_TOKEN;
         var askPtPin = process.env.XXOO_FOR;
         var ops = {
-            'url': `${host}/uploadAndGetCodes?token=${token}&askFor=${askPtPin}`,
+            'url': `${host}/uploadAndGetCodes?token=${token}&askFor=${askPtPin}&clientVersion=${version}`,
             'headers': {
                 "Content-Type": "application/json",
             },
@@ -106,10 +106,8 @@ function uploadAndGetShareCodes(data) {
     }
 }
 
-
-
-function addSource(desc,func){
-    shareCodeSources.push({'desc':desc,'func':func});
+function addSource(desc, func) {
+    shareCodeSources.push({'desc': desc, 'func': func});
 }
 
 function readFromConfigSources() {
@@ -132,14 +130,14 @@ function readFromConfigSources() {
     return mergedCodes;
 }
 
-function mergeCodes(source1,source2){
-    var res={};
+function mergeCodes(source1, source2) {
+    var res = {};
     for (let ptPin of ptPins) {
-        var a=source1[ptPin];
-        var b=source2[ptPin];
+        var a = source1[ptPin];
+        var b = source2[ptPin];
         var mergedCodes = {};
-        mergedCodes=Object.assign(a==undefined?{}:a,mergedCodes);
-        mergedCodes=Object.assign(b==undefined?{}:b,mergedCodes,);
+        mergedCodes = Object.assign(a == undefined ? {} : a, mergedCodes);
+        mergedCodes = Object.assign(b == undefined ? {} : b, mergedCodes,);
         res[ptPin] = mergedCodes;
     }
     return res;
