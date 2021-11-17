@@ -38,7 +38,7 @@ https://t.me/xxoo_pool
 # 食用方法
 
 - 1.青龙面板->对比工具 右上角的当前文件选择 task_before.sh, 追加以下内容到脚本中
-<code>
+```
         ## ======重要提示： 如果是追加到已经存在的 task_before.sh 中，则只拷贝以下内容
         xxooLogDir="${dir_log}/raw_main_xxoo"
         if [[ $(ls $xxooLogDir) ]]; then
@@ -47,7 +47,7 @@ https://t.me/xxoo_pool
             echo "##  task before  $xxooLogDir/$latest_log"
             echo "##  $GENERATE_INFO";
         fi
-</code>
+```
         
 - 2.青龙面板->环境变量 新增以下环境变量
 
