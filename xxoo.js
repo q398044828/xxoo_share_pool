@@ -5,7 +5,7 @@
 [Script]
 cron "0 0 * * *" script-path=xxoo.js, tag=xxoo助力池
  */
-var version='1.0.0';
+var version='1.0.1';
 var fs = require("fs");
 console.log(":<<EOF");
 const $ = new Env("xxoo互助池");
