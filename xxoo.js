@@ -3,13 +3,12 @@
 
 ================Loon==============
 [Script]
-cron "0 0 * * *" script-path=xxoo2.js, tag=xxoo助力池
-
+cron "0 0 * * *" script-path=xxoo.js, tag=xxoo助力池
  */
 var version='1.0.0';
 var fs = require("fs");
 console.log(":<<EOF");
-const $ = new Env("获取互助码+参与xxoo互助池");
+const $ = new Env("xxoo互助池");
 let cookiesArr = [], cookie = '', message;
 const jdCookieNode = $.isNode() ? jdCookies() : '';
 var shareCodeSources=[];
