@@ -37,11 +37,14 @@ switch ($_SERVER['PATH_INFO']) {
 resRaw($response['data']);
 
 function clientVersionChekc($clientVersion){
+    global $response;
     if ($clientVersion!==CLIENT_VERSION) {
-        global $response;
         slog($response,"========== 更新提示 ============");
-        slog($response,"       请更新xxoo.js版本         ");
+        slog($response,"");
+        slog($response,"       请更新xxoo.js版本");
+        slog($response,"");
         slog($response,"===============================");
+        slog($response,"");
     }
 }
 
@@ -128,7 +131,7 @@ function updateUserDataVersion($user, $dataVersion)
         [
             'ID' => $user['ID']
         ]);
-    slog($response, "数据更新状态：" . json_encode($res));
+    slog($response, " 数据更新状态：" . json_encode($res));
 }
 
 function updateAskFor($userId,$reqData,$askFor)
