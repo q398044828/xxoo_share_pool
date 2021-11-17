@@ -3,7 +3,7 @@
 
 ================Loon==============
 [Script]
-cron "0 0 * * 6" script-path=xoo.js, tag=xxoo互助池-同步助力码
+cron "0 0 * * *" script-path=xxoo2.js, tag=xxoo助力池
 
  */
 var version='1.0.0';
