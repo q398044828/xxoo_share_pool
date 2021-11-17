@@ -1,4 +1,10 @@
 /*
+
+
+================Loon==============
+[Script]
+cron "0 0 * * 6" script-path=xoo.js, tag=xxoo互助池-同步助力码
+
  */
 var version='1.0.0';
 var fs = require("fs");
