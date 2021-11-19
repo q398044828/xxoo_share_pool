@@ -1,12 +1,8 @@
 <?php
 
-require_once 'config.php';
-
-//define('DB_URL', 'test.db');
-
-
-require_once('./db.php');
-require_once './util.php';
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/lib/db.php';
+require_once __DIR__ . '/lib/util.php';
 
 switch ($argv[1]) {
     case 'init':

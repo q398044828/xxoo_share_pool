@@ -1,8 +1,8 @@
 <?php
 
-require_once './config.php';
-require_once './db.php';
-require_once './util.php';
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/util.php';
 
 $response = ['data' => ''];
 
@@ -23,16 +23,10 @@ cleanByRule();
 
 $res = "";
 $testData = [];
-switch ($_SERVER['PATH_INFO']) {
-    case '/uploadAndGetCodes':
-        $res = uploadAndGetCodes($user, $GLOBALS['HTTP_RAW_POST_DATA'], $_GET['askFor']);
-        slog($response, "  ↓↓↓↓↓↓↓↓↓↓↓↓ 以下为下发的助力码 ↓↓↓↓↓↓↓↓↓↓↓↓");
-        resAppend($response, $res);
-        break;
-    default :
-        res(400, '不盈利，不推广，自用！！，请勿攻击');
-        break;
-}
+
+$res = uploadAndGetCodes($user, file_get_contents("php://input"), $_GET['askFor']);
+slog($response, "  ↓↓↓↓↓↓↓↓↓↓↓↓ 以下为下发的助力码 ↓↓↓↓↓↓↓↓↓↓↓↓");
+resAppend($response, $res);
 resRaw($response['data']);
 
 function clientVersionChekc($clientVersion)

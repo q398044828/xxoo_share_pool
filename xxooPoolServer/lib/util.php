@@ -1,5 +1,4 @@
 <?php
-require_once './db.php';
 
 function res($code, $msg, $data = null)
 {
