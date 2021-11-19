@@ -1,12 +1,11 @@
 <?php
 
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/lib/db.php';
 require_once __DIR__ . '/lib/util.php';
 
 switch ($argv[1]) {
     case 'init':
-        runSql("db.sql", []);
+        runSql(__DIR__ . "/db.sql", []);
         break;
     case 'query':
         query($argv[2]);

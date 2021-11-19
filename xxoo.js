@@ -5,7 +5,7 @@
 [Script]
 cron "0 0 * * *" script-path=xxoo.js, tag=xxoo助力池
  */
-var version='1.0.1';
+var version='1.0.2';
 var fs = require("fs");
 console.log(":<<EOF");
 const $ = new Env("xxoo互助池");
@@ -97,7 +97,7 @@ function uploadAndGetShareCodes(data) {
         var askPtPin = process.env.XXOO_FOR;
         var closeSelf = process.env.XXOO_CLOSE_SELF;
         var ops = {
-            'url': `${host}/uploadAndGetCodes?token=${token}&askFor=${askPtPin}&clientVersion=${version}&closeSelf=${closeSelf}`,
+            'url': `${host}/index.php?token=${token}&askFor=${askPtPin}&clientVersion=${version}&closeSelf=${closeSelf}`,
             'headers': {
                 "Content-Type": "application/json",
             },

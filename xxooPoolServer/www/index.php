@@ -1,11 +1,8 @@
 <?php
-
 require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../lib/db.php';
 require_once __DIR__ . '/../lib/util.php';
 
 $response = ['data' => ''];
-
 
 //客户端版本检测
 clientVersionChekc($_GET['clientVersion']);
@@ -16,7 +13,6 @@ $userId = $user['ID'];
 $limited = $user['LIMITED'];
 //用户上传的助力码数量校验
 recordLimitCheck($userId, $limited);
-
 //每次被请求都先清理超过2周没有更新的数据
 cleanByRule();
 
@@ -25,6 +21,7 @@ $res = "";
 $testData = [];
 
 $res = uploadAndGetCodes($user, file_get_contents("php://input"), $_GET['askFor']);
+
 slog($response, "  ↓↓↓↓↓↓↓↓↓↓↓↓ 以下为下发的助力码 ↓↓↓↓↓↓↓↓↓↓↓↓");
 resAppend($response, $res);
 resRaw($response['data']);
