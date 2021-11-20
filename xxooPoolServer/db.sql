@@ -59,3 +59,7 @@ CREATE TABLE user_for
 --[10]
 CREATE INDEX user_for_ask_for
     on user_for (ASK_FOR);
+
+--[11]
+ALTER TABLE 'user'
+    ADD 'CURRENT_NUM' INT;              -- 用户当前上传的助力数

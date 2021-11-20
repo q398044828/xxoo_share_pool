@@ -1,30 +1,33 @@
 <?php
+
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../lib/util.php';
 
+
 $response = ['data' => ''];
+try {
+    $req = getReq();
 
-//客户端版本检测
-clientVersionChekc($_GET['clientVersion']);
-
-// 用户校验和获取
-$user = getUser($_GET[TOKEN_PARAMETER_NAME]);
-$userId = $user['ID'];
-$limited = $user['LIMITED'];
-//用户上传的助力码数量校验
-recordLimitCheck($userId, $limited);
-//每次被请求都先清理超过2周没有更新的数据
-cleanByRule();
+    //客户端版本检测
+    clientVersionChekc($req->reqClientVersion);
+    //一次性拿到所有需要的数据，减少io次数
+    getAllNeedByOnce($req);
+    // 用户校验和获取
+    $user = $req->user;
 
 
-$res = "";
-$testData = [];
+    $res = "";
+    $testData = [];
 
-$res = uploadAndGetCodes($user, file_get_contents("php://input"), $_GET['askFor']);
 
-slog($response, "  ↓↓↓↓↓↓↓↓↓↓↓↓ 以下为下发的助力码 ↓↓↓↓↓↓↓↓↓↓↓↓");
-resAppend($response, $res);
-resRaw($response['data']);
+    $res = uploadAndGetCodes($req);
+
+    slog($response, "  ↓↓↓↓↓↓↓↓↓↓↓↓ 以下为下发的助力码 ↓↓↓↓↓↓↓↓↓↓↓↓");
+    resAppend($response, $res);
+    resRaw($response['data']);
+} catch (Exception $e) {
+    var_dump($e);
+}
 
 function clientVersionChekc($clientVersion)
 {
@@ -39,35 +42,27 @@ function clientVersionChekc($clientVersion)
     }
 }
 
-function cleanByRule()
-{
-    global $db;
-    $ctime = time() - 1209600;//2周前
-    $count = $db->count('share_code', [
-        'CREATE_TIME[<]' => $ctime
-    ]);
-    //为什么要先查询再执行update? 因为sqlite执行修改时会锁定文件导致并发下降,但是可以共享读
-    if ($count > 100) {
-        //大于100判断是为了减少进行删除的频率
-        $db->delete('share_code', [
-            'CREATE_TIME[<]' => $ctime
-        ]);
-    }
-}
 
 /**
  * 用户助力码数量校验
  * @param $userId
  * @param $limited
  */
-function recordLimitCheck($userId, $limited)
+function recordLimitCheck(Req $req)
 {
-    global $db;
-    $count = $db->count('share_code', [
-        'USER_ID' => $userId
-    ]);
+    $currentNum = $req->user['CURRENT_NUM'];
+    $limited = $req->user['LIMITED'];
+    $newAdd = 0;
+    if ($currentNum == null) {
+        $currentNum = 0;
+        $command = "refreshCurrentCodeNum " . $req->user['ID'] . " " . $req->user['TOKEN'];
+        triggerTask($command, "../async.log");
+    }
+    foreach ($req as $env => $d) {
+        $newAdd = $newAdd + count($d);
+    }
 
-    if ($count > $limited) {
+    if ($currentNum + $newAdd > $limited) {
         res(400, '当前用户token上传的助力码数量已超标');
     }
 }
@@ -76,33 +71,37 @@ function recordLimitCheck($userId, $limited)
  * @param $userId
  * @param $data
  */
-function uploadAndGetCodes($user, $req, $askFor)
+function uploadAndGetCodes(Req $req)
 {
+
     global $response;
-    $userId = $user['ID'];
-    $data = json_decode($req, true);
+    $userId = $req->user['ID'];
+    $data = $req->reqData;
 
     //根据请求数据的版本判断是否需要更新数据库，如果需要，
-    $newVersion = getNewVersionIfNeedUpdate($user, $req, $askFor);
+    $newVersion = getNewVersionIfNeedUpdate($req);
     if ($newVersion != null) {
+        //用户上传的助力码数量校验
+        recordLimitCheck($req);
         slog($response, " 更新助力码版本 ${newVersion}");
         uploadjson($userId, $data);
-        updateAskFor($userId, $data, $askFor);
-        updateUserDataVersion($user, $newVersion);
+        updateAskFor($req);
+        updateUserDataVersion($req->user, $newVersion);
     }
 
     //获取助力码返回给客户端
-    $r = getCodes($userId, $data, $askFor);
+    $r = getCodes($req);
 
     //获取定向信息
-    $askForMe = getAskForMe($userId, $data);
+    $askForMe = getAskForMe($req);
+
     slog($response, "");
     if (count($askForMe) > 0) {
         slog($response, " ================== 定向您的用户 ============");
-        slog($response, "");
-        foreach ($askForMe as $me) {
+        slog($response, " 安全问题，暂时关闭此处显示 ");
+        /*foreach ($askForMe as $me) {
             slog($response, "   $me");
-        }
+        }*/
     } else {
         slog($response, " ==================== 定向您的用户 ============");
         slog($response, "");
@@ -112,11 +111,27 @@ function uploadAndGetCodes($user, $req, $askFor)
     return $r;
 }
 
-function getNewVersionIfNeedUpdate($user, $req, $askFor)
+/**
+ * 根据传入的请求参数，判断是否有新数据版本号
+ * @param $user
+ * @param $req
+ * @param $askFor
+ * @return string|null
+ */
+function getNewVersionIfNeedUpdate(Req $req)
 {
-    $reqMd5 = md5($req . $askFor);
-    $oldMd5 = $user['DATA_VERSION'];
+
     $res = null;
+
+    if (USE_REDIS) {
+        if ($req->areadyRequestDataVersion != null) {
+            return null;
+        }
+    }
+    $user = $req->user;
+    $reqMd5 = $req->reqMd5;
+    $oldMd5 = $user['DATA_VERSION'];
+
     if ($reqMd5 == $oldMd5) {
         $dbUpdateTime = $user['UPDATED_TIME'];
         if ((time() - $dbUpdateTime) > MAX_NO_UPDATE_DAY) {
@@ -125,29 +140,52 @@ function getNewVersionIfNeedUpdate($user, $req, $askFor)
     } else {
         $res = $reqMd5;
     }
+    if (USE_REDIS) {
+        getRedis()->set(getReqDataVersion($reqMd5), true, 7200);
+    }
     return $res;
 }
 
-function updateUserDataVersion($user, $dataVersion)
+/**
+ * 一次性拿到所有需要的数据，减少io次数
+ */
+function getAllNeedByOnce(Req $req)
 {
-    global $db, $response;
-    $res = $db->update('user',
-        [
-            'DATA_VERSION' => $dataVersion,
-            'UPDATED_TIME' => time()
-        ],
-        [
-            'ID' => $user['ID']
-        ]);
-    slog($response, " 数据更新状态：" . json_encode($res));
+    $reqDataVersionKey = getReqDataVersion($req->reqMd5);
+    $userKey = getUserKey($req->reqToken);
+    $getAskForMeKey = getAskForMeKey($req->reqAskForRaw);
+    $call = [
+        $reqDataVersionKey => new Cache($reqDataVersionKey, 7200, false, function () {
+            return null;
+        }),
+        $userKey => new Cache($userKey, 3600, true, function () use ($req) {
+            return getUserFromDB($req->reqToken);
+        }),
+        $getAskForMeKey => new Cache($getAskForMeKey, 3600, true, function () use ($req) {
+            return getAskForMeFromDB($req);
+        })
+    ];
+
+    $resArr = getDataByArr($call);
+
+    $req->user = $resArr[$userKey];
+    $req->areadyRequestDataVersion = $resArr[$reqDataVersionKey];
+    $req->getAskForMe = $resArr[$getAskForMeKey];
+
+    return $req;
 }
 
 /**
  * 获取定向自己的用户
  */
-function getAskForMe($userId, $reqData)
+function getAskForMe(Req $req)
 {
-    $ptPins = array_keys($reqData);
+    return $req->getAskForMe;
+}
+
+function getAskForMeFromDB(Req $req)
+{
+    $ptPins = array_keys($req->reqData);
     if (count($ptPins) > 0) {
         global $db;
         $askForMe = $db->select('user_for', ['PT_PIN', 'ASK_FOR'], ['ASK_FOR' => $ptPins]);
@@ -166,15 +204,11 @@ function getAskForMe($userId, $reqData)
  * @param $reqData
  * @param $askFor
  */
-function updateAskFor($userId, $reqData, $askFor)
+function updateAskFor(Req $req)
 {
-    $askForArr = explode(";", $askFor);
-    if (count($askForArr) > 1) {
-        updateAskForArr($userId, $reqData, $askForArr);
-    } else {
-        //旧的定向助力方式
-        updateAskForOld($userId, $reqData, $askFor);
-    }
+
+    $userId = $req->user['ID'];
+    updateAskForArr($userId, $req->reqData, $req->reqAskFor);
 }
 
 
@@ -189,19 +223,10 @@ function updateAskForArr($userId, $reqData, array $askForArr)
     }
 }
 
-//旧定向助力方式
-function updateAskForOld($userId, $reqData, $askFor)
-{
-    global $db, $response;
-    foreach ($reqData as $ptPin => $codes) {
-        updateAskForByPtPin($userId, $ptPin, $askFor);
-    }
-}
 
-function updateAskForByPtPin($userId, $ptPin, $askFor)
+function updateAskForByPtPin($userId, $ptPin, $askForPins)
 {
     global $db;
-    $askForPins = explode("@", $askFor);
     //删除旧的定向
     $res = $db->delete('user_for', [
         'AND' => [
@@ -258,163 +283,477 @@ function saveShareCode($userId, $ptPin, $env, $code)
     } else {
         $res = true;
     }
+
+    if (USE_REDIS) {
+        getRedis()->sAdd(getEnvCodeKey($env), $code);
+    }
     return $res;
 }
 
 
-function getCodes($userId, $req, $askFor)
+function getCodes(Req $req)
 {
-    global $db;
+
+    /**
+     * 助力码分3大块，
+     * 1 $reqCodes 请求里带的助力码，用户多账号自助
+     * 2 $askForCodes 定向助力别人的助力码
+     * 3 $dbEnvs 数据库随机获取的助力码，用户给别人随机助力
+     * 以上三种数据，都需要是以下格式：才方便合并
+     * [
+     *     "env1":[
+     *          ["askFor1Code","askFor2Code","askFor3Code"],[第二个账号的askFor],[第三个账号的askFor]
+     *      ]
+     * ]
+     */
 
     //请求里的互助码
-    $envNames = [];
-    foreach ($req as $ptPin => $envs) {
-        foreach ($envs as $env => $code) {
-            if (!isset($envNames[$env])) {
-                $envNames[$env] = [];
-            }
-            $envNames[$env][] = $code;
-        }
-    }
-    $reqCodes = $_GET['closeSelf'] === true ? [] : $envNames;
+    $envNames = parseReqCodes($req);
+    $reqCodes = $envNames;
 
     // 数据库的互助码
     $dbEnvs = [];
     foreach ($envNames as $env => $v) {
-        $dbEnvCodes = getCodesByEnvFromDB($env);
+        $dbEnvCodes = getCodesByEnv($env, count($req->reqData));
         $dbEnvs[$env] = $dbEnvCodes;
     }
 
     //请求要求的互助码
-    $askForCodes = askFor($askFor);
+    $askForCodes = askFor($req, $envNames);
 
-    $finalEnvCodes = mergeCodesByEnv($envNames, $reqCodes, $askForCodes, $dbEnvs);
+    $finalEnvCodes = mergeCodesByEnv($reqCodes, $askForCodes, $dbEnvs);
 
-    $res = mergeDbEnvAndReqEnv($finalEnvCodes, $req);
+    $res = mergeDbEnvAndReqEnv($req, $finalEnvCodes);
+    return $res;
+}
+
+function parseReqCodes(Req $req)
+{
+
+    $res = [];
+    if ($_GET['closeSelf'] !== true) {
+        $envNames = [];
+        foreach ($req->reqData as $ptPin => $envs) {
+            foreach ($envs as $env => $code) {
+                if (!isset($envNames[$env])) {
+                    $envNames[$env] = [];
+                }
+                $envNames[$env][] = $code;
+            }
+        }
+
+        $ptPinNum = count($req->reqData);
+        foreach ($envNames as $env => $codes) {
+            if ($res[$env] == null) {
+                $res[$env] = [];
+            }
+            for ($i = 0; $i < $ptPinNum; $i++) {
+                $res[$env][] = $codes;
+            }
+        }
+    }
     return $res;
 }
 
 /**
  *
  * @param $finalEnvCodes
- * {
- *     "a":["1","2","3"],
- *     "b":["4","5","6"]
- * }
+ * [
+ *     "env1":[
+ *          ["askFor1Code","askFor2Code","askFor3Code"],[第二个账号的askFor],[第三个账号的askFor]
+ *      ]
+ * ]
  * @param $req
  * @return string
  */
-function mergeDbEnvAndReqEnv($finalEnvCodes, $req)
+function mergeDbEnvAndReqEnv(Req $req, $finalEnvCodes)
 {
+
+    $reqPtPins = array_keys($req->reqData);
     $shell = "";
-    foreach ($finalEnvCodes as $env => $codes) {
-        $allPtPinEnvCodes = [];
-        foreach ($req as $ptPin => $envs) {
-            $reqEnvCode = $envs[$env];
-            $ptPinMergedCodes = array_diff($codes, [$reqEnvCode]);
-            $ptPinMergedCodes = array_filter($ptPinMergedCodes);
-            $ptPinMergedCodes = implode("@", $ptPinMergedCodes);
-            $allPtPinEnvCodes[] = $ptPinMergedCodes;
+    foreach ($finalEnvCodes as $env => $accounts) {
+        $sh = [];
+        foreach ($accounts as $i => $ptpinFors) {
+            if (count($ptpinFors) > 0) {
+                $ptpinFors = array_diff($ptpinFors, [$req->reqData[$reqPtPins[$i]][$env], '']);
+                $sh[] = implode("@", $ptpinFors);
+            }
         }
-        $allPtPinEnvCodes = implode("&", $allPtPinEnvCodes);
-        $sh = "export ${env}=\"${allPtPinEnvCodes}\"\r\n";
-        $shell = "${shell}${sh}";
+        if (count($sh) > 0) {
+            $shell = "${shell}export ${env}=\"" . implode("&", $sh) . "\"\r\n";
+        }
     }
     $date = date('Y年m月d日 H:i:s');
-    $shell = "${shell}export GENERATE_INFO=\"xxoo助力池同步时间===========》 ${date}\"\r\n";
+    $shell = "${shell}export GENERATE_INFO=\"xxoo助力池同步时间: ${date}\"\r\n";
     return $shell;
 }
 
 /**
  * 按照传入的顺序根据env合并code
- * {
- *     "a":["1","2","3"],
- *     "b":["4","5","6"]
- * }
- * @param $allEnvNames key=env名,value不重要
+ *
+ * b数组参数的每个元素数据结构：
+ * [
+ *     "env1":[
+ *          ["code1","code2","code3"],[第二个账号要助力的码],[第三个账号要助力的码]
+ *      ],
+ *      "env2":[ [],[],[] ]
+ * ]
  * @param ...$b
  */
-function mergeCodesByEnv($allEnvNames, ...$b)
+function mergeCodesByEnv(...$b)
 {
-
     $merges = [];
-    foreach ($allEnvNames as $env => $va) {
-        $tmpCodes = [];
-        foreach ($b as $k => $envCodes) {
-            if (isset($envCodes[$env])) {
-                $tmpCodes = arrayPushArray($tmpCodes, $envCodes[$env]);
+    foreach ($b as $el) {
+        foreach ($el as $env => $mulitAccount) {
+            foreach ($mulitAccount as $i => $ptPinFors) {
+                tool3DarrayAppend($env, $i, $ptPinFors, $merges);
             }
         }
-        $tmpCodes = array_unique($tmpCodes);
-        $merges[$env] = $tmpCodes;
     }
-
     return $merges;
 }
 
-function askFor($askFor)
+/**
+ * 三位数组 追加数组值
+ * @param $env
+ * @param $ptPinLocation
+ * @param array $appendArr 要追加的
+ * @param array $arr
+ */
+function tool3DarrayAppend($env, $ptPinLocation, array $appendArr, array &$arr)
 {
-    global $db, $response;
-    $askFor = explode("@", $askFor);
-    $res = $db->select('share_code', ['ENV', 'CODE', 'PT_PIN'], [
-        'PT_PIN' => $askFor
-    ]);
+    if (!isset($arr[$env])) {
+        $arr[$env] = [];
+    }
+    if (!isset($arr[$env][$ptPinLocation])) {
+        $arr[$env][$ptPinLocation] = [];
+    }
+    $old = $arr[$env][$ptPinLocation];
+    $arr[$env][$ptPinLocation] = array_merge($old, $appendArr);
+}
 
+/**
+ * 定向助力
+ * @param $askFor
+ * @return array
+ * [
+ *     "env1":[
+ *          ["askFor1Code","askFor2Code","askFor3Code"],[第二个账号的askFor],[第三个账号的askFor]
+ *      ]
+ * ]
+ */
+function askFor(Req $req, array $allEnvName)
+{
 
-    /**
-     * 转成格式且根据传入的askFor顺序进行code的排序
-     * [
-     *     'env1':['1','2'],
-     *     'env2':['a','b']
-     * ]
-     */
-    $codes = [];
-    $askForOrder = array_flip($askFor);
-    foreach ($res as $envCode) {
-        $env = $envCode['ENV'];
-        $code = $envCode['CODE'];
-        if (!isset($codes[$env])) {
-            $codes[$env] = [];
+    $ptPins = getAskForPtPins($req->reqAskFor);
+    $codes = getAskForCodes($req, $ptPins);
+
+    return askForDataConvert($req, $allEnvName, $codes);
+}
+
+/**
+ * @param Req $req
+ * @param $askPtPins
+ * ["ptpin1","ptpin2",...]
+ * @return 无序数据
+ * [
+ *      "${pt_pin}__${env}":[
+ *            'PT_PIN'=>'ptpin1',
+ *            'CODE'=>'code1',
+ *            'ENV'=>'env1'
+ *      ]
+ * ]
+ */
+function getAskForCodes(Req $req, $askPtPins)
+{
+    global $db;
+    $dbCodes = [];
+    $cacheCodes = [];
+    $needFromDb = [];
+    if (USE_REDIS) {
+        $cacheRes = getRedis()->mget(getPtPinCoeKeyArr($askPtPins));
+        $size = count($askPtPins);
+        for ($i = 0; $i < $size; $i++) {
+            $v = $cacheRes[$i];
+            if ($v != false) {
+                $v = json_decode($v, true);
+                $v['PT_PIN'] = $askPtPins[$i];
+                $cacheCodes[] = $v;
+            } else {
+                $needFromDb[] = $askPtPins[$i];
+            }
         }
-        $order = $askForOrder[$envCode['PT_PIN']];
-        $codes[$env][$order] = $code;
     }
-    foreach ($codes as $env => &$envCodes) {
-        ksort($envCodes);
+    if (count($needFromDb) > 0) {
+        $dbCodes = $db->select('share_code', ['ENV', 'CODE', 'PT_PIN'], [
+            'PT_PIN' => $needFromDb
+        ]);
     }
+    $res = array_merge($dbCodes, $cacheCodes);
+
+    $codes = [];
+    foreach ($res as $i => $v) {
+        $codes["${v['PT_PIN']}__${v['ENV']}"] = $v['CODE'];
+    }
+
     return $codes;
+}
+
+function getAskForPtPins(array $reqAskFor)
+{
+    $res = [];
+    if ($reqAskFor != null) {
+        foreach ($reqAskFor as $i => $ptPins) {
+            $res = array_merge($res, $ptPins);
+        }
+    }
+    return $res;
 }
 
 
 /**
- * 从数据库随机获取对应env下的互助码
+ * 转换数据格式，并根据请求的askFor排序
+ * @param codes
+ * [
+ *      "${pt_pin}__${env}":[
+ *            'PT_PIN'=>'ptpin1',
+ *            'CODE'=>'code1',
+ *            'ENV'=>'env1'
+ *      ]
+ * ]
+ * 转成：
+ * [
+ *     "env1":[
+ *          ["askFor1Code","askFor2Code","askFor3Code"],[第二个账号的askFor],[第三个账号的askFor]
+ *      ]
+ * ]
  */
-function getCodesByEnvFromDB($env)
+function askForDataConvert(Req $req, $allEnvName, array $codes)
 {
-    global $db;
-    $argEnv = $db->quote($env);
-    $sql = <<<EOF
-    select CODE from share_code where env = $argEnv
-EOF;
-    //HELP_NUM[$env][1] + 2;//+2是为了防止随机获取到用户自己的导致不够
-    $canHelpNum = DEFAULT_GET_CODE_NUM;//为什么还是改成大于可助力次数的值？因为有可能下发的已经被助力过了
-    $res = $db->query($sql . " ORDER BY RANDOM() limit " . $canHelpNum)->fetchAll();
-    $codes = [];
-    foreach ($res as $r) {
-        $codes[] = $r['CODE'];
+
+    $res = [];
+    if (count($req->reqAskFor) < 1) {
+        return $res;
     }
-    return array_unique($codes);
+
+    foreach ($allEnvName as $env => $v) {
+        $i = 0;
+        foreach ($req->reqData as $ptPin => $v2) {
+            $askOrder = $req->reqAskFor[$i];
+            $accountAskCodes = [];
+            foreach ($askOrder as $askPtPin) {
+                $accountAskCodes[] = $codes["${askPtPin}__${env}"];
+
+            }
+            tool3DarrayAppend($env, $i, $accountAskCodes, $res);
+            $i++;
+        }
+    }
+
+    return $res;
 }
 
-function getUser($token)
+
+/**
+ * 从数据库/缓存 随机获取对应env下的互助码
+ * @param $ptPinNum 账户个数，用于动态判断随机获取多少个助力码
+ */
+function getCodesByEnv($env, $ptPinNum)
 {
+
+    $codes = [];
+    $canHelpNum = DEFAULT_GET_CODE_NUM * $ptPinNum;
+    $canHelpNum = $canHelpNum > 50 ? 50 : $canHelpNum;//部分人可能会使用大量账户，获取太多助力码影响性能，所以，限制下
+    if (USE_REDIS) {
+        $res = getRedis()->sRandMember(getEnvCodeKey($env), $canHelpNum);
+        foreach ($res as $k => $code) {
+            $codes[] = $code;
+        }
+    } else {
+        global $db;
+        $argEnv = $db->quote($env);
+        $sql = <<<EOF
+    select CODE from share_code where env = $argEnv
+EOF;
+        $randFunc = DB_TYPE == 'mysql' ? "RAND()" : "RANDOM()";
+        $res = $db->query($sql . " ORDER BY ${randFunc} limit " . $canHelpNum)->fetchAll();
+        foreach ($res as $r) {
+            $codes[] = $r['CODE'];
+        }
+    }
+    triggerRefershEnvCodeCache($env);
+    $codes = array_unique($codes);
+    return array_chunk($codes, $canHelpNum / $ptPinNum);
+}
+
+/**
+ * 触发输入根据环境变量刷入助力码到缓存中
+ * @param $env
+ */
+function triggerRefershEnvCodeCache($env)
+{
+    $needUpdateCodeCaches = getRedis()->get("envCodeNeedUpdate:${env}");
+    if ($needUpdateCodeCaches == null) {
+        triggerTask("refresh ${env}", "../refresh.log");
+        getRedis()->set("envCodeNeedUpdate:${env}", true, 7200 + rand(0, 30) * 120);
+    }
+}
+
+function triggerTask($command, $log)
+{
+    pclose(popen("php ../data.php ${command} >> ../${log} 2>&1 &", 'r'));
+}
+
+//-------------------------------------------------- user 操作相关 ----------------------------------------
+function getUserFromDB($token)
+{
+
     global $db;
-    $user = $db->select('user', ['ID', 'LIMITED', 'DATA_VERSION', 'UPDATED_TIME'], [
+    $user = $db->select('user', ['ID', 'LIMITED', 'TOKEN', 'DATA_VERSION', 'UPDATED_TIME', 'CURRENT_NUM'], [
         'TOKEN' => $token
     ]);
     if (count($user) < 1) {
         res(400, 'token不存在');
     }
     return $user[0];
+
 }
 
+
+function updateUserDataVersion($user, $dataVersion)
+{
+    updData("user:${user['TOKEN']}", function () use ($user, $dataVersion) {
+        global $db, $response;
+        $res = $db->update('user',
+            [
+                'DATA_VERSION' => $dataVersion,
+                'UPDATED_TIME' => time()
+            ],
+            [
+                'ID' => $user['ID']
+            ]);
+        slog($response, " 数据更新状态：" . json_encode($res));
+    });
+}
+
+/**
+ * 解析请求参数
+ * @return Req
+ */
+function getReq()
+{
+
+    $req = new Req(
+        $_GET[TOKEN_PARAMETER_NAME],
+        file_get_contents("php://input"),
+        $_GET['clientVersion']
+    );
+
+    //定向助力解析
+    $askFor = $_GET['askFor'];
+    $askForMulit = explode(";", $askFor);
+    if (count($askForMulit) > 1) {
+        $askForMulitArr = [];
+        foreach ($askForMulit as $k => $askForArr) {
+            $askForMulitArr[] = explode("@", $askForArr);
+        }
+        $req->reqAskFor = $askForMulitArr;
+    } else {
+        //旧的定向助力转新定向助力
+        $askForPins = explode("@", $askFor);
+        $oldReqAskFor = [];
+        foreach ($req->reqData as $reqPtPin => $v) {
+            $oldReqAskFor[] = $askForPins;
+        }
+        $req->reqAskFor = $oldReqAskFor;
+    }
+    $req->reqAskForRaw = $askFor;
+
+    //请求参数的md5值
+    $reqMd5 = md5($req->reqBody . $req->reqAskForRaw);
+    $req->reqMd5 = $reqMd5;
+    return $req;
+}
+
+
+class Req
+{
+
+    /**
+     * 不同账号定向助力不同的用户,根据索引和reqData的索引对应
+     * @var null
+     * [
+     *      ["ptpin11","ptpin2"],
+     *      ["ptpin33","ptpin44"]
+     * ]
+     */
+    public $reqAskFor = null;
+
+    /**
+     * @var null
+     * [
+     *     "ptpin1":[
+     *          "env1"=>"xxx",
+     *          "env2"=>"xxx"
+     *      ],
+     *      "ptpin2":[
+     *          "env1"=>"xxx",
+     *          "env2"=>"xxx"
+     *      ]
+     * ]
+     */
+    public $reqData = null;
+    /**
+     * @var null 普通字符串
+     */
+    public $reqToken = null;
+    public $reqClientVersion = null;
+
+    /**
+     * @var null 请求体里的原始数据
+     */
+    public $reqBody = null;
+    /**
+     *
+     */
+    public $reqAskForRaw = null;
+
+    /**
+     * @var null 用户表对象
+     */
+    public $user = null;
+
+    /**
+     * @var null 根据请求参数生成的md5值，如果客户端请求的此参数一直没变，那么定向数据
+     */
+    public $reqMd5 = null;
+
+    public $areadyRequestDataVersion = null;
+
+    public $getAskForMe = null;
+
+
+    function __construct($reqToken, $reqData, $clientVersion)
+    {
+        $this->reqToken = $reqToken;
+        $this->reqData = json_decode($reqData, true);
+        $this->reqClientVersion = $clientVersion;
+        $this->reqBody = $reqData;
+    }
+}
+
+class Cache
+{
+    public $key;
+    public $timeout;
+    public $call;
+    public $isArray;
+
+    function __construct($key, $timeout, $isArray, $call)
+    {
+        $this->key = $key;
+        $this->timeout = $timeout;
+        $this->call = $call;
+        $this->isArray = $isArray;
+    }
+}

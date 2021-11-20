@@ -3,9 +3,10 @@ require_once __DIR__ . '/lib/medoo.php';
 
 const DB_URL = __DIR__ . '/shareCode.db';
 const TOKEN_PARAMETER_NAME = 'token';
-const MAX_NO_UPDATE_DAY = 432000;//互助码上报时，最长不更新CREATE_TIME的时间，单位秒 432000=5天
+const MAX_NO_UPDATE_DAY = 1;//互助码上报时，最长不更新CREATE_TIME的时间，单位秒 432000=5天
 const CLIENT_VERSION = '1.0.2'; //客户端版本，用于提示xxoo.js版本需要更新
 const DEFAULT_GET_CODE_NUM = 10;//默认从数据库取的code数量
+
 /**
  * 数据库管理密码,进入管理页面时使用,这里需要修改成你自己的
  * 管理地址：根据参数：
@@ -14,7 +15,7 @@ const DEFAULT_GET_CODE_NUM = 10;//默认从数据库取的code数量
  * username: 不填
  * Password: 填你自己设置的密码
  */
-const DB_PASSWORD = "123456";
+const DB_PASSWORD = "Kk4545469565";
 
 /**
  * 如果你不懂这个参数，就不要动这个参数
@@ -24,9 +25,11 @@ const DB_OTHER_MANAGER = false;
 
 /**
  * 数据库采用medoo框架，可以更换数据库，如使用其他数据库，参考官方文档生成$db对象
+ * 暂时只支持 mysql,sqlite
  */
+const DB_TYPE = "sqlite";
 $db = new medoo([
-    'database_type' => 'sqlite',
+    'database_type' => DB_TYPE,
     'database_file' => DB_URL
 ]);
 
@@ -38,6 +41,7 @@ const USE_REDIS = true;
 const REDIS_HOST = '127.0.0.1';
 const REDIS_PORT = '6379';
 const REDIS_PASS = '';
+const REDIS_DEFAULT_TIME = 43200;
 
 
 /**
@@ -47,7 +51,7 @@ const REDIS_PASS = '';
  * a: 需要助力的次数
  * b: 可提供助力次数
  */
-const HELP_NUM = [
+const ENVS = [
     'FRUITSHARECODES' => [5, 3],                //京东农场
     'PETSHARECODES' => [5, 5],                  //京东萌宠
     'PLANT_BEAN_SHARECODES' => [9, 3],          //种豆得豆

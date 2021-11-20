@@ -19,38 +19,17 @@ function test(&$testData, $key, $data)
     }
 }
 
-function slog(&$res,$str)
+function slog(&$res, $str)
 {
     $res['data'] = $res['data'] . "# log=>${str}
 ";
 }
-function resAppend(&$res,$appendStr){
+
+function resAppend(&$res, $appendStr)
+{
     $res['data'] = $res['data'] . $appendStr;
 }
 
-function testDie($data)
-{
-    if ($_GET['devTest']) {
-        dieJson($data);
-    }
-}
-
-function isTest()
-{
-    if ($_GET['devTest']) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-function arrayPushArray(&$array, $addArray)
-{
-    foreach ($addArray as $v) {
-        array_push($array, $v);
-    }
-    return $array;
-}
 
 function resRaw($data)
 {
@@ -58,18 +37,92 @@ function resRaw($data)
 }
 
 
-function startsWith($haystack, $needle)
+function updData($key, $func)
 {
-    $length = strlen($needle);
-    return (substr($haystack, 0, $length) === $needle);
+    $func();
+    if (USE_REDIS) {
+        getRedis()->del($key);
+    }
 }
 
-function endsWith($haystack, $needle)
+
+/*
+ * key 缓存key,
+ * val Cache对象
+ */
+function getDataByArr(array $arr)
 {
-    $length = strlen($needle);
-    if ($length == 0) {
-        return true;
+    $keys = array_keys($arr);
+    $res = [];
+    if (USE_REDIS) {
+        $cacheRes = getRedis()->mget($keys);
+        foreach ($cacheRes as $i => $r) {
+            if ($r == false) {
+                $cache = $arr[$keys[$i]];
+                $call = $cache->call;
+                $r = $call();
+                $putCache = $r;
+                if ($cache->isArray) {
+                    $putCache = json_encode($putCache);
+                }
+                getRedis()->set($keys[$i], $putCache, $cache->timeout);
+            }
+            $res[$keys[$i]] = json_decode($r, true);
+        }
+    } else {
+        foreach ($arr as $key => $c) {
+            $call = $c->call;
+            $res[$key] = $call();
+        }
     }
 
-    return (substr($haystack, -$length) === $needle);
+    return $res;
+}
+
+$redis = null;
+function getRedis()
+{
+    global $redis;
+    if ($redis == null) {
+        $redis = new Redis();
+        $redis->connect(REDIS_HOST, REDIS_PORT, REDIS_DEFAULT_TIME);//serverip port
+        if (REDIS_PASS != '') {
+            $redis->auth(REDIS_PASS);
+        }
+    }
+    return $redis;
+}
+
+function getUserKey($token)
+{
+    return "user:" . $token;
+}
+
+function getAskForMeKey($str)
+{
+    return "getAskForMe:" . $str;
+}
+
+function getReqDataVersion($reqMd5)
+{
+    return "reqDataVersion:" . $reqMd5;
+}
+
+function getEnvCodeKey($env)
+{
+    return "envCodeCache:${env}";
+}
+
+function getPtPinCodeKey($ptPin)
+{
+    return "ptPinCodeCache:${ptPin}";
+}
+
+function getPtPinCoeKeyArr(array $ptPins)
+{
+    $keys = [];
+    foreach ($ptPins as $ptPin) {
+        $keys[] = getPtPinCodeKey($ptPin);
+    }
+    return $keys;
 }
