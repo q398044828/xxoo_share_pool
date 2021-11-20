@@ -3,11 +3,12 @@ require_once __DIR__ . '/lib/medoo.php';
 
 
 const TOKEN_PARAMETER_NAME = 'token';
-const MAX_NO_UPDATE_DAY = 1;//互助码上报时，最长不更新CREATE_TIME的时间，单位秒 432000=5天
+const MAX_NO_UPDATE_DAY = 432000;//互助码上报时，最长不更新CREATE_TIME的时间，单位秒 432000=5天
 const CLIENT_VERSION = '1.0.2'; //客户端版本，用于提示xxoo.js版本需要更新
 const DEFAULT_GET_CODE_NUM = 10;//默认从数据库取的code数量
 
 /**
+ * 此参数仅仅用于使用无密码sqlite时进行管理作用，如果使用mysql，则不理会此参数
  * 数据库管理密码,进入管理页面时使用,这里需要修改成你自己的
  * 管理地址：根据参数：
  * System：sqlite3
@@ -15,7 +16,7 @@ const DEFAULT_GET_CODE_NUM = 10;//默认从数据库取的code数量
  * username: 不填
  * Password: 填你自己设置的密码
  */
-const DB_PASSWORD = "123456";
+const SQLITE_MANAGER_PASSWORD = "123456";
 
 /**
  * 如果你不懂这个参数，就不要动这个参数
@@ -48,7 +49,7 @@ const DB_TYPE = "mysql";
 $db = new medoo([
     'database_type' => DB_TYPE,
     'database_name' => 'xxoo_pool',
-    'server' => '192.168.1.9',
+    'server' => '192.168.1.1',
     'port' => 3306,
     'username' => 'root',
     'password' => '123456'
