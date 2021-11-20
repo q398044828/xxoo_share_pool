@@ -100,6 +100,11 @@ function runSql($file, $posis)
 {
     global $db;
     $fileContent = file_get_contents($file);
+
+    if (DB_TYPE == 'mysql') {
+        $fileContent = str_replace("autoincrement", "AUTO_INCREMENT", $fileContent);
+    }
+
     $sqls = explode(";", $fileContent);
     $NamedSqls = [];
     foreach ($sqls as $sql) {
