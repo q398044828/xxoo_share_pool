@@ -102,7 +102,7 @@ function getRedis()
     global $redis;
     if ($redis == null) {
         $redis = new Redis();
-        $redis->connect(REDIS_HOST, REDIS_PORT, REDIS_DEFAULT_TIME);//serverip port
+        $redis->pconnect(REDIS_HOST, REDIS_PORT, REDIS_DEFAULT_TIME);//serverip port
         if (REDIS_PASS != '') {
             $redis->auth(REDIS_PASS);
         }
