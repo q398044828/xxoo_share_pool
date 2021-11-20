@@ -184,20 +184,5 @@ export GENERATE_INFO="xxoo助力池同步时间===========》 2021年11月13日 
 
 # 自建服务池：如果你想要自建的话
 
-环境要求：php > 7.0版本  
+请参考 xxooPoolServer目录内的README
 
-### 安装方法
-    
-    
-    - 将xxooPoolServer目录拷贝到你的服务器的某个目录
-    - cd到你服务器的xxooPoolServer根目录
-    - 输入命令：php data.php init 进行数据库初始化 初始化后，默认自带一个用户token,token=dev_token
-
-        
-            如果你需要增加用户表记录，可以这么做
-            输入命令：php data.php exec "${这里是insert sql,自己写}"
-
-    - 输入命令：php -S 0.0.0.0:999
-
-    说明：本项目目的不是为了大量用户使用，目的是为了自用顺便开源出来
-         所以一切从简，数据库采用的sqlite,所以，如果要自建服务池又对服务池有要求的，请你自己修改或重写
