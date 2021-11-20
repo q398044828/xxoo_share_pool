@@ -6,7 +6,7 @@ CREATE TABLE share_code
     PT_PIN      VARCHAR(128),     -- 用户上传的pt_pin值
     ENV         VARCHAR(128),     -- 环境变量名
     CODE        VARCHAR(256),     -- 助力码
-    CREATE_TIME timestamp         -- 创建时间，也是更新时间
+    CREATE_TIME TIMESTAMP         -- 创建时间，也是更新时间
 );
 
 -- [1]
@@ -28,7 +28,7 @@ CREATE TABLE user
     TOKEN       VARCHAR (128) NOT NULL, -- 用户对接服务池的token值，需要开放给用户
     ENABLED     INT,                   -- 启用状态 1启用 0禁用
     LIMITED     int,                   -- 上传的code数限制
-    CREATE_TIME timestamp
+    CREATE_TIME TIMESTAMP
 );
 
 -- [5]
@@ -37,7 +37,7 @@ CREATE UNIQUE INDEX user_token
 
 -- [6]
 insert into `user`(`TOKEN`, `ENABLED`, `LIMITED`)
-values ('dev_token', 1, 1000);
+values ('dev_token', 1, 10000);
 
 -- [7]
 ALTER TABLE `user`
@@ -45,7 +45,7 @@ ALTER TABLE `user`
 
 -- [8]
 ALTER TABLE `user`
-    ADD `UPDATED_TIME` timestamp;
+    ADD `UPDATED_TIME` TIMESTAMP;
 
 -- [9] 定向助力表
 CREATE TABLE user_for

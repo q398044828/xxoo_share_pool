@@ -106,6 +106,7 @@ function getRedis()
         if (REDIS_PASS != '') {
             $redis->auth(REDIS_PASS);
         }
+        $redis->select(REDIS_IDNEX);
     }
     return $redis;
 }

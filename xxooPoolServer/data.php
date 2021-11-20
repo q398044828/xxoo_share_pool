@@ -102,7 +102,9 @@ function runSql($file, $posis)
     $fileContent = file_get_contents($file);
 
     if (DB_TYPE == 'mysql') {
+        //兼容mysql
         $fileContent = str_replace("autoincrement", "AUTO_INCREMENT", $fileContent);
+        $fileContent = str_replace("TIMESTAMP","BIGINT",$fileContent);
     }
 
     $sqls = explode(";", $fileContent);

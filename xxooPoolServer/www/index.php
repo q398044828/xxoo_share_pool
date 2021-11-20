@@ -61,7 +61,6 @@ function recordLimitCheck(Req $req)
     foreach ($req as $env => $d) {
         $newAdd = $newAdd + count($d);
     }
-
     if ($currentNum + $newAdd > $limited) {
         res(400, '当前用户token上传的助力码数量已超标');
     }
