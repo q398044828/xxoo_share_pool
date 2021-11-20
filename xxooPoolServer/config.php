@@ -15,7 +15,7 @@ const DEFAULT_GET_CODE_NUM = 10;//默认从数据库取的code数量
  * username: 不填
  * Password: 填你自己设置的密码
  */
-const DB_PASSWORD = "Kk4545469565";
+const DB_PASSWORD = "123456";
 
 /**
  * 如果你不懂这个参数，就不要动这个参数

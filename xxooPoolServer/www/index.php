@@ -98,10 +98,10 @@ function uploadAndGetCodes(Req $req)
     slog($response, "");
     if (count($askForMe) > 0) {
         slog($response, " ================== 定向您的用户 ============");
-        slog($response, " 安全问题，暂时关闭此处显示 ");
-        /*foreach ($askForMe as $me) {
+        slog($response, "");
+        foreach ($askForMe as $me) {
             slog($response, "   $me");
-        }*/
+        }
     } else {
         slog($response, " ==================== 定向您的用户 ============");
         slog($response, "");
@@ -167,7 +167,6 @@ function getAllNeedByOnce(Req $req)
     ];
 
     $resArr = getDataByArr($call);
-
     $req->user = $resArr[$userKey];
     $req->areadyRequestDataVersion = $resArr[$reqDataVersionKey];
     $req->getAskForMe = $resArr[$getAskForMeKey];
@@ -191,7 +190,7 @@ function getAskForMeFromDB(Req $req)
         $askForMe = $db->select('user_for', ['PT_PIN', 'ASK_FOR'], ['ASK_FOR' => $ptPins]);
         $res = [];
         foreach ($askForMe as $k => $v) {
-            $res[] = $v['PT_PIN'] . ' 助力=> ' . $v['ASK_FOR'];
+            $res[] = sensitive($v['PT_PIN']) . ' 助力=> ' . sensitive($v['ASK_FOR']);
         }
         return $res;
     }

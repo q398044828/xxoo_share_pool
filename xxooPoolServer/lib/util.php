@@ -12,6 +12,21 @@ function dieJson($data)
     return die(json_encode($data));
 }
 
+/**
+ * 敏感信息隐藏
+ * @param $str
+ */
+function sensitive($str)
+{
+    $length = strlen($str);
+    $reLen = 6;
+    if ($length < 10) {
+        $reLen = 3;
+    }
+    $s = ($length / 2) - $reLen / 2;
+    return substr_replace($str, "******", $s, $reLen);
+}
+
 function test(&$testData, $key, $data)
 {
     if ($_GET['devTest']) {
@@ -66,8 +81,10 @@ function getDataByArr(array $arr)
                     $putCache = json_encode($putCache);
                 }
                 getRedis()->set($keys[$i], $putCache, $cache->timeout);
+                $res[$keys[$i]] = $r;
+            } else {
+                $res[$keys[$i]] = json_decode($r, true);
             }
-            $res[$keys[$i]] = json_decode($r, true);
         }
     } else {
         foreach ($arr as $key => $c) {
