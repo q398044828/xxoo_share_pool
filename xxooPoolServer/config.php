@@ -71,7 +71,7 @@ const REDIS_HOST = '127.0.0.1';
 const REDIS_PORT = '6379';
 const REDIS_PASS = '';
 const REDIS_DEFAULT_TIME = 43200;
-const REDIS_IDNEX = 0;
+const REDIS_IDNEX = 1;
 
 
 /**

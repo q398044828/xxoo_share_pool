@@ -152,7 +152,7 @@ function getAllNeedByOnce(Req $req)
 {
     $reqDataVersionKey = getReqDataVersion($req->reqMd5);
     $userKey = getUserKey($req->reqToken);
-    $getAskForMeKey = getAskForMeKey($req->reqAskForRaw);
+    $getAskForMeKey = getAskForMeKey($req->reqMd5);
     $call = [
         $reqDataVersionKey => new Cache($reqDataVersionKey, 7200, false, function () {
             return null;
