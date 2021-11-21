@@ -261,7 +261,7 @@ function uploadjson($userId, $data)
 function isIllegal($code)
 {
     foreach (ILLEGAL_CHAR as $word) {
-        if (strpos($code, $word) > 0) {
+        if (strpos($code, $word) !== false) {
             return true;
         }
     }
