@@ -237,6 +237,7 @@ function updateAskForByPtPin($userId, $ptPin, $askForPins)
         if ($askForPin != null
             && $askForPin != ''
             && $askForPin != 'undefined'
+            && $askForPin != $ptPin
             && (!isIllegal(ILLEGAL_PT_PIN_CHAR, $askForPin))) {
             $db->insert('user_for', [
                 'USER_ID' => $userId,
