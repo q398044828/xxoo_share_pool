@@ -234,7 +234,7 @@ function updateAskForByPtPin($userId, $ptPin, $askForPins)
     ]);
     //保存新定向
     foreach ($askForPins as $askForPin) {
-        if ($askForPin != null || $askForPin != '') {
+        if ($askForPin != null && $askForPin != '' && $askForPin != 'undefined') {
             $db->insert('user_for', [
                 'USER_ID' => $userId,
                 'PT_PIN' => $ptPin,
@@ -374,6 +374,7 @@ function mergeDbEnvAndReqEnv(Req $req, $finalEnvCodes)
         foreach ($accounts as $i => $ptpinFors) {
             if (count($ptpinFors) > 0) {
                 $ptpinFors = array_diff($ptpinFors, [$req->reqData[$reqPtPins[$i]][$env], '']);
+                $ptpinFors = array_unique($ptpinFors);
                 $sh[] = implode("@", $ptpinFors);
             }
         }
