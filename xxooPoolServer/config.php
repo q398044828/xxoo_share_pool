@@ -51,8 +51,8 @@ $db = new medoo([
     'database_name' => 'xxoo_pool',
     'server' => '192.168.1.1',
     'port' => 3306,
-    'username' => 'root',
-    'password' => '123456'
+    'username' => '',
+    'password' => ''
 ]);
 
 /*
@@ -95,4 +95,14 @@ const ENVS = [
     'JDCFD_SHARECODES' => [5, 5],               //京喜财富岛
     'JDHEALTH_SHARECODES' => [5, 5],            //东东健康
     'CITY_SHARECODES' => [5, 5]                 //城城领现金
+];
+
+/**
+ * 助力码非法字符集，用于过滤
+ */
+const ILLEGAL_CHAR=[
+    '{',
+    '}',
+    '[',
+    ']'
 ];

@@ -250,10 +250,22 @@ function uploadjson($userId, $data)
 
     foreach ($data as $ptPin => $envs) {
         foreach ($envs as $env => $code) {
-            saveShareCode($userId, $ptPin, $env, $code);
+            if (!isIllegal($code)) {
+                saveShareCode($userId, $ptPin, $env, $code);
+            }
         }
     }
     return $userId;
+}
+
+function isIllegal($code)
+{
+    foreach (ILLEGAL_CHAR as $word) {
+        if (strpos($code, $word) > 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function saveShareCode($userId, $ptPin, $env, $code)
@@ -335,6 +347,9 @@ function parseReqCodes(Req $req)
             foreach ($envs as $env => $code) {
                 if (!isset($envNames[$env])) {
                     $envNames[$env] = [];
+                }
+                if (isIllegal($code)) {
+                    continue;
                 }
                 $envNames[$env][] = $code;
             }
