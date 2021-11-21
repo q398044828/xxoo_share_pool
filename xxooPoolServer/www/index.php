@@ -234,7 +234,10 @@ function updateAskForByPtPin($userId, $ptPin, $askForPins)
     ]);
     //保存新定向
     foreach ($askForPins as $askForPin) {
-        if ($askForPin != null && $askForPin != '' && $askForPin != 'undefined') {
+        if ($askForPin != null
+            && $askForPin != ''
+            && $askForPin != 'undefined'
+            && (!isIllegal(ILLEGAL_PT_PIN_CHAR, $askForPin))) {
             $db->insert('user_for', [
                 'USER_ID' => $userId,
                 'PT_PIN' => $ptPin,
@@ -250,7 +253,7 @@ function uploadjson($userId, $data)
 
     foreach ($data as $ptPin => $envs) {
         foreach ($envs as $env => $code) {
-            if (!isIllegal($code)) {
+            if (!isIllegalCode($code)) {
                 saveShareCode($userId, $ptPin, $env, $code);
             }
         }
@@ -258,10 +261,15 @@ function uploadjson($userId, $data)
     return $userId;
 }
 
-function isIllegal($code)
+function isIllegalCode($code)
 {
-    foreach (ILLEGAL_CHAR as $word) {
-        if (strpos($code, $word) !== false) {
+    return isIllegal(ILLEGAL_CHAR, $code);
+}
+
+function isIllegal(array $vars, $str)
+{
+    foreach ($vars as $word) {
+        if (strpos($str, $word) !== false) {
             return true;
         }
     }
@@ -348,7 +356,7 @@ function parseReqCodes(Req $req)
                 if (!isset($envNames[$env])) {
                     $envNames[$env] = [];
                 }
-                if (isIllegal($code)) {
+                if (isIllegalCode($code)) {
                     continue;
                 }
                 $envNames[$env][] = $code;

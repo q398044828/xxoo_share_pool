@@ -51,8 +51,8 @@ $db = new medoo([
     'database_name' => 'xxoo_pool',
     'server' => '192.168.1.1',
     'port' => 3306,
-    'username' => '',
-    'password' => ''
+    'username' => ' ',
+    'password' => ' '
 ]);
 
 /*
@@ -100,9 +100,16 @@ const ENVS = [
 /**
  * 助力码非法字符集，用于过滤
  */
-const ILLEGAL_CHAR=[
+const ILLEGAL_CHAR = [
     '{',
     '}',
     '[',
     ']'
+];
+
+/**
+ * pt_pin非法字符集，用于过滤
+ */
+const ILLEGAL_PT_PIN_CHAR = [
+    'pt_pin'
 ];
