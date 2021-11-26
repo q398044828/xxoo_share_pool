@@ -1,4 +1,10 @@
 <?php
+require_once __DIR__ . '/env.php';
+
+if (getenv('CONFIG_ENVED') == null) {
+    die("请先执行本目录中的env.sh");
+}
+
 require_once __DIR__ . '/lib/medoo.php';
 
 
@@ -44,15 +50,14 @@ const DB_OTHER_MANAGER = false;
  *      'password'=>''
  * ]);
  */
-
 const DB_TYPE = "mysql";
 $db = new medoo([
     'database_type' => DB_TYPE,
-    'database_name' => 'xxoo_pool',
-    'server' => '192.168.1.1',
-    'port' => 3306,
-    'username' => ' ',
-    'password' => ' '
+    'database_name' => getenv('DB_NAME'),
+    'server' => getenv('DB_HOST'),
+    'port' => getenv('DB_PORT'),
+    'username' => getenv('DB_USER'),
+    'password' => getenv('DB_PASS')
 ]);
 
 /*
@@ -67,8 +72,8 @@ $db = new medoo([
  * redis配置，如果你的服务器有phpredis扩展的话才打开，否则不要打开
  */
 const USE_REDIS = true;
-const REDIS_HOST = '127.0.0.1';
-const REDIS_PORT = '6379';
+define("REDIS_HOST", getenv('REDIS_HOST'));
+define("REDIS_PORT", getenv('REDIS_PORT'));
 const REDIS_PASS = '';
 const REDIS_DEFAULT_TIME = 43200;
 const REDIS_IDNEX = 1;
