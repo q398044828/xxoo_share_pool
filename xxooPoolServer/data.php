@@ -5,7 +5,12 @@ require_once __DIR__ . '/lib/util.php';
 
 switch ($argv[1]) {
     case 'init':
-        runSql(__DIR__ . "/db.sql", []);
+        if (createDatabase() == true) {
+            runSql(__DIR__ . "/db.sql", []);
+        }
+        break;
+    case 'create_database':
+        createDatabase();
         break;
     case 'query':
         query($argv[2]);
@@ -48,9 +53,39 @@ EOF;
         break;
 }
 
+/**
+ * 创建数据库
+ */
+function createDatabase()
+{
+    $host = getenv('DB_HOST');
+    $database = getenv('DB_DATABASE');
+    $pass = getenv('DB_PASS');
+    $rootPass = getenv('DB_ROOT_PASS');
+    $port = getenv('DB_PORT');
+    $user = getenv('DB_USER');
+    $dsn = "mysql:host=${host};port=${port}";
+    var_dump($dsn);
+    var_dump($user);
+    var_dump($pass);
+    var_dump($database);
+    $conn = new PDO($dsn, 'root', $rootPass);
+    $res = $conn->exec("CREATE DATABASE $database");
+    if ($res == false) {
+        var_dump("创建数据库失败");
+        var_dump($conn->errorInfo());
+        return false;
+    }
+    var_dump('分配数据库权限');
+    $conn->exec("GRANT ALL PRIVILEGES ON *.* TO '${user}'@'%' IDENTIFIED BY '${pass}' WITH GRANT OPTION");
+    $conn->exec("FLUSH PRIVILEGES");
+    return true;
+
+}
+
 function refreshCurrentCodeNum($userId, $token)
 {
-    global $db;
+    $db = getDB();
     $count = $db->count('share_code', [
         'USER_ID' => $userId
     ]);
@@ -69,7 +104,7 @@ function refreshAll()
 
 function refresh($env)
 {
-    global $db;
+    $db = getDB();
 
     //刷数据到缓存前清理数据
     dataClean();
@@ -98,13 +133,13 @@ function refresh($env)
 
 function runSql($file, $posis)
 {
-    global $db;
+    $db = getDB();
     $fileContent = file_get_contents($file);
 
     if (DB_TYPE == 'mysql') {
         //兼容mysql
         $fileContent = str_replace("autoincrement", "AUTO_INCREMENT", $fileContent);
-        $fileContent = str_replace("TIMESTAMP","BIGINT",$fileContent);
+        $fileContent = str_replace("TIMESTAMP", "BIGINT", $fileContent);
     }
 
     $sqls = explode(";", $fileContent);
@@ -130,20 +165,20 @@ function runSql($file, $posis)
 
 function query($sql)
 {
-    global $db;
+    $db = getDB();
     var_dump($db->query($sql)->fetchAll());
 }
 
 function sql($sql)
 {
-    global $db;
+    $db = getDB();
     $db->query($sql);
     var_dump($db->error());
 }
 
 function dataClean()
 {
-    global $db;
+    $db = getDB();
     $ctime = time() - 1209600;//2周前
     $count = $db->count('share_code', [
         'CREATE_TIME[<]' => $ctime

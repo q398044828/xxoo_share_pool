@@ -51,14 +51,12 @@ const DB_OTHER_MANAGER = false;
  * ]);
  */
 const DB_TYPE = "mysql";
-$db = new medoo([
-    'database_type' => DB_TYPE,
-    'database_name' => getenv('DB_NAME'),
-    'server' => getenv('DB_HOST'),
-    'port' => getenv('DB_PORT'),
-    'username' => getenv('DB_USER'),
-    'password' => getenv('DB_PASS')
-]);
+define("DB_DATABASE", getenv('DB_DATABASE'));
+define("DB_HOST", getenv('DB_HOST'));
+define("DB_PORT", getenv('DB_PORT'));
+define("DB_USER", getenv('DB_USER'));
+define("DB_PASS", getenv('DB_PASS'));
+
 
 /*
 const DB_URL = __DIR__ . '/shareCode.db';

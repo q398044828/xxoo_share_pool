@@ -111,6 +111,23 @@ function getRedis()
     return $redis;
 }
 
+$db = null;
+function getDB()
+{
+    global $db;
+    if ($db == null) {
+        $db = new medoo([
+            'database_type' => DB_TYPE,
+            'database_name' => DB_DATABASE,
+            'server' => DB_HOST,
+            'port' => DB_PORT,
+            'username' => DB_USER,
+            'password' => DB_PASS
+        ]);
+    }
+    return $db;
+}
+
 function getUserKey($token)
 {
     return "user:" . $token;

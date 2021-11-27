@@ -4,9 +4,10 @@ CRTDIR=$(pwd)
 cd ${CRTDIR}
 echo "
 <?php
+putenv('DB_ROOT_PASS=${DB_ROOT_PASS}');
 putenv('CONFIG_ENVED=true');
 putenv('DB_HOST=${DB_HOST}');
-putenv('DB_NAME=${DB_NAME}');
+putenv('DB_DATABASE=${DB_DATABASE}');
 putenv('DB_PORT=${DB_PORT}');
 putenv('DB_USER=${DB_USER}');
 putenv('DB_PASS=${DB_PASS}');

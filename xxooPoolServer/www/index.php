@@ -185,7 +185,7 @@ function getAskForMeFromDB(Req $req)
 {
     $ptPins = array_keys($req->reqData);
     if (count($ptPins) > 0) {
-        global $db;
+        $db = getDB();
         $askForMe = $db->select('user_for', ['PT_PIN', 'ASK_FOR'], ['ASK_FOR' => $ptPins]);
         $res = [];
         foreach ($askForMe as $k => $v) {
@@ -224,7 +224,7 @@ function updateAskForArr($userId, $reqData, array $askForArr)
 
 function updateAskForByPtPin($userId, $ptPin, $askForPins)
 {
-    global $db;
+    $db = getDB();
     //删除旧的定向
     $res = $db->delete('user_for', [
         'AND' => [
@@ -282,7 +282,7 @@ function saveShareCode($userId, $ptPin, $env, $code)
     if ($code == '' || $code == null) {
         return false;
     }
-    global $db;
+    $db = getDB();
     //先尝试修改，修改成功则表示已经存在
     $data = [
         'USER_ID' => $userId,
@@ -489,7 +489,7 @@ function askFor(Req $req, array $allEnvName)
  */
 function getAskForCodes(Req $req, $askPtPins)
 {
-    global $db;
+    $db = getDB();
     $dbCodes = [];
     $cacheCodes = [];
     $needFromDb = [];
@@ -593,7 +593,7 @@ function getCodesByEnv($env, $ptPinNum)
             $codes[] = $code;
         }
     } else {
-        global $db;
+        $db = getDB();
         $argEnv = $db->quote($env);
         $sql = <<<EOF
     select CODE from share_code where env = $argEnv
@@ -631,7 +631,7 @@ function triggerTask($command, $log)
 function getUserFromDB($token)
 {
 
-    global $db;
+    $db = getDB();
     $user = $db->select('user', ['ID', 'LIMITED', 'TOKEN', 'DATA_VERSION', 'UPDATED_TIME', 'CURRENT_NUM'], [
         'TOKEN' => $token
     ]);

@@ -1,0 +1,33 @@
+version: '3'
+services:
+  xxoo:
+    container_name: 'xxoo'
+    image: "xxoo:1.0"
+    ports:
+      - "889:80"
+    stdin_open: true
+    tty: true
+    environment:
+      DB_HOST: 'mariadb'
+      DB_PORT: '3306'
+      DB_USER: 'xxoo'  # 需要和 MARIADB_USER 参数一致
+      DB_PASS: 'testpass' # 需要 和 MARIADB_PASSWORD 一致
+      DB_ROOT_PASS: 'testrootpass'   # 需要和 MARIADB_ROOT_PASSWORD 参数一致
+      DB_DATABASE: 'xxoo_pool'
+      REDIS_HOST: 'redis'
+      REDIS_PORT: '6379'
+    depends_on:
+      - redis
+      - mariadb
+  redis:
+    container_name: 'redis'
+    image: "redis:latest"
+  mariadb:
+    container_name: 'mariadb'
+    image: "mariadb:latest"
+    environment:
+      MARIADB_USER: 'xxoo'
+      MARIADB_PASSWORD: 'testpass'
+      MARIADB_ROOT_PASSWORD: 'testrootpass'
+    volumes:
+      - ./xxoo-mariadb-data:/var/lib/mysql
