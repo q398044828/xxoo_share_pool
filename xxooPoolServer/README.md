@@ -1,8 +1,11 @@
 # 使用说明
 
 部署方式：
+
+
     docker
     docker-compose
+    注：目前只支持x86架构
 
 部署：
 
