@@ -4,7 +4,7 @@ FROM centos:7
 RUN yum install -y epel-release \
     && rpm -ivh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm \
     && yum install -y php72w php72w-pdo php72w-mysql php72w-pecl-redis php72w-opcache php72w-fpm \
-    && yum install -y nginx \
+    && yum install -y nginx crontabs \
     && mkdir -p /var/www/xxoo
 
 COPY ./ /var/www/xxoo

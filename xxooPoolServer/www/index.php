@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../lib/util.php';
 
-
+reqCheck();
 $response = ['data' => ''];
 try {
     $req = getReq();
@@ -56,7 +56,7 @@ function recordLimitCheck(Req $req)
     if ($currentNum == null) {
         $currentNum = 0;
         $command = "refreshCurrentCodeNum " . $req->user['ID'] . " " . $req->user['TOKEN'];
-        triggerTask($command, "../async.log");
+        triggerTask($command, "async.log");
     }
     foreach ($req as $env => $d) {
         $newAdd = $newAdd + count($d);
@@ -617,14 +617,15 @@ function triggerRefershEnvCodeCache($env)
 {
     $needUpdateCodeCaches = getRedis()->get("envCodeNeedUpdate:${env}");
     if ($needUpdateCodeCaches == null) {
-        triggerTask("refresh ${env}", "../refresh.log");
+        triggerTask("refresh ${env}", "refresh.log");
         getRedis()->set("envCodeNeedUpdate:${env}", true, 7200 + rand(0, 30) * 120);
     }
 }
 
 function triggerTask($command, $log)
 {
-    pclose(popen("php ../data.php ${command} >> ../${log} 2>&1 &", 'r'));
+    asyncShell("php ../data.php ${command}");
+    //pclose(popen("php ../data.php ${command} >> ../${log} 2>&1 &", 'r'));
 }
 
 //-------------------------------------------------- user 操作相关 ----------------------------------------
@@ -696,6 +697,24 @@ function getReq()
     $reqMd5 = md5($req->reqBody . $req->reqAskForRaw);
     $req->reqMd5 = $reqMd5;
     return $req;
+}
+
+function reqCheck()
+{
+    if (!empty($_GET['taskPass']) && $_GET['taskPass'] == getenv('TASK_PASS')) {
+        ignore_user_abort(true);
+        set_time_limit(0);
+        $task = file_get_contents("php://input");
+        $f = popen($task, 'r');
+        do {
+            $r = fgets($f);
+            echo $r . "\r\n";
+            if (empty($r)) {
+                break;
+            }
+        } while (true);
+        die();
+    }
 }
 
 

@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/util.php';
-
 switch ($argv[1]) {
     case 'init':
         if (createDatabase() == true) {
@@ -93,6 +92,7 @@ function refreshCurrentCodeNum($userId, $token)
         'ID' => $userId
     ]);
     getRedis()->del(getUserKey($token));
+    dlog("refreshCurrentCodeNum_${userId}","count ${count}");
 }
 
 function refreshAll()
@@ -113,6 +113,7 @@ function refresh($env)
     $page = 0;
     $num = 200;
     $loopMax = 999;
+    $c = 0;
     do {
         $loopMax--;
         $res = $db->select('share_code', ['CODE'], [
@@ -126,9 +127,11 @@ function refresh($env)
         foreach ($res as $k => $data) {
             $codes[] = $data['CODE'];
         }
+        $c = $c + count($res);
         getRedis()->sAddArray(getEnvCodeKey($env), $codes);
         $page++;
     } while ($loopMax > 0);
+    dlog("refresh_${env}", " count " . $c);
 }
 
 function runSql($file, $posis)
@@ -189,6 +192,7 @@ function dataClean()
         $db->delete('share_code', [
             'CREATE_TIME[<]' => $ctime
         ]);
+        echo getDatetime() . ' > 刪除' . $count . "条数据\r\n";
     }
 }
 

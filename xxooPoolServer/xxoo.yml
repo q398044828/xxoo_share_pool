@@ -16,6 +16,7 @@ services:
       DB_DATABASE: 'xxoo_pool'
       REDIS_HOST: 'redis'
       REDIS_PORT: '6379'
+      TASK_PASS: 'testpass' # 异步触发任务密码，请勿泄露,运行前修改
     depends_on:
       - redis
       - mariadb

@@ -161,3 +161,33 @@ function getPtPinCoeKeyArr(array $ptPins)
     }
     return $keys;
 }
+
+function getDatetime()
+{
+    return date("Y-m-d H:i:s", time());
+}
+
+function dlog($key, $val)
+{
+    if (USE_REDIS) {
+        getRedis()->set($key, getDatetime() . " ${val}");
+    }
+    echo getDatetime() . " ${key} ${val}\r\n";
+}
+
+function asyncShell($cmd)
+{
+    $url = "http://localhost:80/index.php?taskPass=".getenv('TASK_PASS');//接受curl请求的地址
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+
+    curl_setopt($ch, CURLOPT_POST, 1);
+
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $cmd);//post方式数据为json格式
+    curl_setopt($ch, CURLOPT_TIMEOUT, 0.03);//设置超时时间为1s
+
+    $result = curl_exec($ch);
+    curl_close($ch);
+    return $result;
+}
+

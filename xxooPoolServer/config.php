@@ -74,7 +74,7 @@ define("REDIS_HOST", getenv('REDIS_HOST'));
 define("REDIS_PORT", getenv('REDIS_PORT'));
 const REDIS_PASS = '';
 const REDIS_DEFAULT_TIME = 43200;
-const REDIS_IDNEX = 1;
+const REDIS_IDNEX = 0;
 
 
 /**
