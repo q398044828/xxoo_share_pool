@@ -2,7 +2,7 @@ version: '3'
 services:
   xxoo:
     container_name: 'xxoo'
-    image: "kkqqhh/xxoo:1.0"
+    image: "kkqqhh/xxoo:latest"
     ports:
       - "889:80"
     stdin_open: true
