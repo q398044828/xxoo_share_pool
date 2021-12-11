@@ -88,7 +88,7 @@ uploadAndGetShareCodes(codes);
 
 
 /**
- * 上传互助码并拉取互助池中的互助码
+ * 上传互助码并拉取互助池中的互助码s
  */
 function uploadAndGetShareCodes(data) {
     if (process.env.XXOO_HOST && process.env.XXOO_TOKEN) {
