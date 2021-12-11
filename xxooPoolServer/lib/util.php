@@ -175,17 +175,22 @@ function dlog($key, $val)
     echo getDatetime() . " ${key} ${val}\r\n";
 }
 
+function getenvl($key, $default)
+{
+    $res = getenv($key);
+    return empty($res) ? $default : $res;
+}
+
 function asyncShell($cmd)
 {
-    $url = "http://localhost:80/index.php?taskPass=".getenv('TASK_PASS');//接受curl请求的地址
+
+    $url = "http://localhost:80/index.php?taskPass=" . getenvl('TASK_PASS', TASK_PASS);//接受curl请求的地址
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
-
     curl_setopt($ch, CURLOPT_POST, 1);
-
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $cmd);//post方式数据为json格式
-    curl_setopt($ch, CURLOPT_TIMEOUT, 0.03);//设置超时时间为1s
-
+    curl_setopt($ch, CURLOPT_TIMEOUT_MS, 5);//设置超时时间为1s
     $result = curl_exec($ch);
     curl_close($ch);
     return $result;

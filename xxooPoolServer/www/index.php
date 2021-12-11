@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../lib/util.php';
 
@@ -701,7 +700,7 @@ function getReq()
 
 function reqCheck()
 {
-    if (!empty($_GET['taskPass']) && $_GET['taskPass'] == getenv('TASK_PASS')) {
+    if (!empty($_GET['taskPass']) && $_GET['taskPass'] == getenv('TASK_PASS', TASK_PASS)) {
         ignore_user_abort(true);
         set_time_limit(0);
         $task = file_get_contents("php://input");
@@ -713,6 +712,11 @@ function reqCheck()
                 break;
             }
         } while (true);
+        die();
+    }
+
+    if ($_REQUEST['_url'] != null) {
+        require_once __DIR__ . '/activity.php';
         die();
     }
 }

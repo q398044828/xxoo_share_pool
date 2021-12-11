@@ -1,7 +1,7 @@
 <?php
-
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/lib/util.php';
+
 switch ($argv[1]) {
     case 'init':
         if (createDatabase() == true) {
@@ -92,7 +92,7 @@ function refreshCurrentCodeNum($userId, $token)
         'ID' => $userId
     ]);
     getRedis()->del(getUserKey($token));
-    dlog("refreshCurrentCodeNum_${userId}","count ${count}");
+    dlog("refreshCurrentCodeNum_${userId}", "count ${count}");
 }
 
 function refreshAll()

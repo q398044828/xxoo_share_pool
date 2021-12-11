@@ -78,6 +78,11 @@ const REDIS_IDNEX = 0;
 
 
 /**
+ * 没有环境变量时使用的默认触发异步任务的密码
+ */
+const TASK_PASS = 'testpassasdf234234.,,sdklfghjdklfg';
+
+/**
  * 助力次数配置
  * [a,b]
  * a: 需要助力的次数
