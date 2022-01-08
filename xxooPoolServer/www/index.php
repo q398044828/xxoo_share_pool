@@ -329,12 +329,15 @@ function getCodes(Req $req)
     $envNames = parseReqCodes($req);
     $reqCodes = $envNames;
 
-    // 数据库的互助码
+    // 数据库的互助码 随机获取
     $dbEnvs = [];
-    foreach ($envNames as $env => $v) {
-        $dbEnvCodes = getCodesByEnv($env, count($req->reqData));
-        $dbEnvs[$env] = $dbEnvCodes;
+    if ($req->random === true) {
+        foreach ($envNames as $env => $v) {
+            $dbEnvCodes = getCodesByEnv($env, count($req->reqData));
+            $dbEnvs[$env] = $dbEnvCodes;
+        }
     }
+
 
     //请求要求的互助码
     $askForCodes = askFor($req, $envNames);
@@ -349,7 +352,7 @@ function parseReqCodes(Req $req)
 {
 
     $res = [];
-    if ($_GET['closeSelf'] !== true) {
+    if ($_GET['closeSelf'] !== 'true') {
         $envNames = [];
         foreach ($req->reqData as $ptPin => $envs) {
             foreach ($envs as $env => $code) {
@@ -671,6 +674,8 @@ function getReq()
         file_get_contents("php://input"),
         $_GET['clientVersion']
     );
+    //是否随机获取助力码
+    $req->random = $_GET['random'] !== 'false';
 
     //定向助力解析
     $askFor = $_GET['askFor'];
@@ -777,6 +782,8 @@ class Req
     public $areadyRequestDataVersion = null;
 
     public $getAskForMe = null;
+
+    public $random = null;
 
 
     function __construct($reqToken, $reqData, $clientVersion)

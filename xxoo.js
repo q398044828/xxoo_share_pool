@@ -114,7 +114,6 @@ function parseCodeFromString(str, data) {
     var ptPin = regexSearch(str, ptPinReg);
     var env = regexSearch(str, envNameReg);
     var code = regexSearch(str, codeReg);
-    console.log(`${ptPin} ${env} ${code}`)
     putVal(data, ptPin, env, code);
 }
 
@@ -148,8 +147,9 @@ function uploadAndGetShareCodes(data) {
         var token = process.env.XXOO_TOKEN;
         var askPtPin = process.env.XXOO_FOR;
         var closeSelf = process.env.XXOO_CLOSE_SELF;
+        var random = process.env.XXOO_RANDOM;
         var ops = {
-            'url': `${host}/index.php?token=${token}&askFor=${askPtPin}&clientVersion=${version}&closeSelf=${closeSelf}`,
+            'url': `${host}/index.php?token=${token}&askFor=${askPtPin}&clientVersion=${version}&closeSelf=${closeSelf}&random=${random}`,
             'headers': {
                 "Content-Type": "application/json",
             },
@@ -257,6 +257,10 @@ function getShareCodeFrom_get_share_code_js_log_ByDir(dir) {
 function getLastFileDataFromDir(dir) {
     var pathName = `${process.env.QL_DIR}/log/${dir}`;
     if (!fs.existsSync(pathName)) {
+        return null;
+    }
+    var stat = fs.statSync(pathName);
+    if (!stat.isDirectory()) {
         return null;
     }
     var files = fs.readdirSync(pathName);
