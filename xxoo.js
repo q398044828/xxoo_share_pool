@@ -108,18 +108,32 @@ function parseCodeFromLogPath(){
 }
 
 function parseCodeFromString(str, data) {
-    var ptPinReg = /用户：(\S*)/;
-    var envNameReg = /环境变量：(\S*)/;
-    var codeReg = /助力码：(\S*)/;
+    var ptPinReg = /用户：(\S*)/g;
+    var envNameReg = /环境变量：(\S*)/g;
+    var codeReg = /助力码：(\S*)/g;
     var ptPin = regexSearch(str, ptPinReg);
     var env = regexSearch(str, envNameReg);
     var code = regexSearch(str, codeReg);
-    putVal(data, ptPin, env, code);
+
+    if (ptPin.length > 0) {
+        for (let i = 0; i < ptPin.length; i++) {
+            putVal(data, ptPin[i].trim(), env[i].trim(), code[i].trim());
+        }
+    }
 }
 
 function regexSearch(str, reg) {
-    var r = str.match(reg);
-    return r == null ? null : r[1].trim();
+    var res = [];
+    var i = 0;
+    do {
+        var r = reg.exec(str);
+        if (r == null) {
+            break;
+        }
+        res[i] = r[1].trim();
+        i++;
+    } while (true)
+    return res;
 }
 
 function putVal(data, x, y, val) {
