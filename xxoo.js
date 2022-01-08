@@ -81,11 +81,62 @@ addSource("code.sh", function () {
     return getShareCodeFrom_code();
 });
 
+//从所有日志中解析助力码
+addSource('log path',function(){
+   return  parseCodeFromLogPath();
+});
+
+
 var codes = readFromConfigSources();
 console.log('------ 整合后的助力码------------');
 console.log(codes);
 uploadAndGetShareCodes(codes);
 
+function parseCodeFromLogPath(){
+    var res={};
+    var logPath=`${process.env.QL_DIR}/log`;
+    var dirs = fs.readdirSync(logPath);
+    for (let i = 0; i < dirs.length; i++) {
+        var logSubPath=dirs[i];
+        var data = getLastFileDataFromDir(logSubPath);
+        if (data == null) {
+            continue;
+        }
+        parseCodeFromString(data,res);
+    }
+    return res;
+}
+
+function parseCodeFromString(str, data) {
+    var ptPinReg = /用户：(\S*)/;
+    var envNameReg = /环境变量：(\S*)/;
+    var codeReg = /助力码：(\S*)/;
+    var ptPin = regexSearch(str, ptPinReg);
+    var env = regexSearch(str, envNameReg);
+    var code = regexSearch(str, codeReg);
+    putVal(data, ptPin, env, code);
+}
+
+function regexSearch(str, reg) {
+    var r = str.match(reg);
+    return r == null ? null : r[1].trim();
+}
+
+function putVal(data, x, y, val) {
+    if (!isEmpty(x) && !isEmpty(x) && !isEmpty(y) && !isEmpty(val)) {
+        val = val.trim();
+        if (val !== '') {
+            if (!data[x]) {
+                data[x] = {};
+            }
+            data[x][y] = val;
+        }
+    }
+}
+
+function isEmpty(str) {
+    return str == null || false || str.trim() === '';
+}
 
 /**
  * 上传互助码并拉取互助池中的互助码s
