@@ -114,6 +114,7 @@ function parseCodeFromString(str, data) {
     var ptPin = regexSearch(str, ptPinReg);
     var env = regexSearch(str, envNameReg);
     var code = regexSearch(str, codeReg);
+    console.log(`${ptPin} ${env} ${code}`)
     putVal(data, ptPin, env, code);
 }
 
