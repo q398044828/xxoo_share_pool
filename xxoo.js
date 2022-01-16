@@ -200,7 +200,9 @@ function readFromConfigSources() {
     for (const k in shareCodeSources) {
         var source = shareCodeSources[k];
         console.log(`         ${source['desc']}`);
-        mergedCodes = mergeCodes(mergedCodes, source['response']);
+        if (source['response']) {
+            mergedCodes = mergeCodes(mergedCodes, source['response']);
+        }
     }
     console.log("                          ");
     return mergedCodes;
