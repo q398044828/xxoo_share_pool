@@ -117,7 +117,9 @@ function parseCodeFromString(str, data) {
 
     if (ptPin.length > 0) {
         for (let i = 0; i < ptPin.length; i++) {
-            putVal(data, ptPin[i].trim(), env[i].trim(), code[i].trim());
+            if (!isEmpty(data) && !isEmpty(ptPin[i]) && !isEmpty(env[i]) && !isEmpty(code[i])) {
+                putVal(data, ptPin[i].trim(), env[i].trim(), code[i].trim());
+            }
         }
     }
 }
@@ -185,11 +187,13 @@ function addSource(desc, func) {
 function readFromConfigSources() {
     var res = [];
     for (let k in shareCodeSources) {
-        var source = shareCodeSources[k];
-        var func = source['func'];
-        var r = func();
-        source['response'] = r;
-        res.push(r);
+        try{
+            var source = shareCodeSources[k];
+            var func = source['func'];
+            var r = func();
+            source['response'] = r;
+            res.push(r);
+        }catch (e){}
     }
     var mergedCodes = {};
     console.log("========= 获取助力码来源 =========");
